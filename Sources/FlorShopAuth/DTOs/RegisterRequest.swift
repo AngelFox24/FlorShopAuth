@@ -1,8 +1,16 @@
 import Foundation
 import Vapor
+import FlorShop_DTOs
 
 struct RegisterRequest: Content {
-    let user: User
-    let userIdentity: UserIdentity
-    let company: Company
+    let authentication: AuthenticationDTO
+    let company: CompanyServerDTO
+    let subsidiary: SubsidiaryServerDTO
+    let role: UserSubsidiaryRole
+    let subdomain: String
+}
+
+struct AuthenticationDTO: Content {
+    let token: String
+    let provider: AuthProvider
 }

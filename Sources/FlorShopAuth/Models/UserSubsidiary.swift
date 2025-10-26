@@ -70,7 +70,7 @@ extension UserSubsidiary {
     }
     static func findSubsidiaries(
         provider: AuthProvider,
-        providerID: String,
+        providerId: String,
         on db: any Database
     ) async throws -> [UserSubsidiary] {
         try await UserSubsidiary.query(on: db)
@@ -78,22 +78,23 @@ extension UserSubsidiary {
             .join(UserIdentity.self, on: \UserSubsidiary.$user.$id == \UserIdentity.$user.$id)
             .join(Company.self, on: \UserSubsidiary.$subsidiary.$id == \Company.$id)
             .filter(UserIdentity.self, \.$provider == provider)
-            .filter(UserIdentity.self, \.$providerID == providerID)
+            .filter(UserIdentity.self, \.$providerId == providerId)
             .with(\.$user)
             .with(\.$subsidiary)
             .all()
     }
-    static func validateUserWorksAtSubsidiary(
-        userId: UUID,
-        subsidiaryId: UUID,
+    static func getSubsidiaryWhereUserWorks(
+        userCic: String,
+        subsidiaryCic: String,
         on db: any Database
-    ) async throws {
-        guard try await UserSubsidiary
-            .query(on: db)
-            .filter(\.$user.$id == userId)
-            .filter(\.$subsidiary.$id == subsidiaryId)
-            .first() != nil else {
-            throw Abort(.badRequest, reason: "User don't work at this company")
-        }
+    ) async throws -> UserSubsidiary? {
+        return try await UserSubsidiary.query(on: db)
+            .join(User.self, on: \UserSubsidiary.$user.$id == \User.$id)
+            .join(Subsidiary.self, on: \UserSubsidiary.$subsidiary.$id == \Subsidiary.$id)
+            .filter(User.self, \.$userCic == userCic)
+            .filter(Subsidiary.self, \.$subsidiaryCic == subsidiaryCic)
+            .with(\.$user)
+            .with(\.$subsidiary)
+            .first()
     }
 }

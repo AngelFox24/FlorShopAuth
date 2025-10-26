@@ -12,6 +12,7 @@ final class Subsidiary: Model, @unchecked Sendable {
     @Field(key: "name") var name: String
     
     @Children(for: \.$subsidiary) var userSubsidiaries: [UserSubsidiary]
+    @Children(for: \.$subsidiary) var invitations: [Invitation]
 
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
@@ -37,6 +38,11 @@ extension Subsidiary {
 }
 
 extension Subsidiary {
+    static func findSubsidiary(subsidiaryCic: String, on db: any Database) async throws -> Subsidiary? {
+        try await Subsidiary.query(on: db)
+            .filter(\.$subsidiaryCic == subsidiaryCic)
+            .first()
+    }
     static func findSubsidiary(subsidiaryId: UUID, on db: any Database) async throws -> Subsidiary? {
         try await Subsidiary.find(subsidiaryId, on: db)
     }

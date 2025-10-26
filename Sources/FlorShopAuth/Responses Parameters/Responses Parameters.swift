@@ -29,7 +29,7 @@ struct CompanyResponseDTO: Content {
 
 struct SubsidiaryResponseDTO: Content {
     let id: UUID
-    let sudsidiary_cic: String
+    let subsidiary_cic: String
     let name: String
     let subsidiary_role: UserSubsidiaryRole
 }

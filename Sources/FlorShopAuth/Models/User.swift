@@ -36,10 +36,9 @@ extension User {
 }
 
 extension User {
-    //TODO: change $id with userId is similar to CIC
-    static func findUser(userId: UUID, on db: any Database) async throws -> User? {
+    static func findUser(userCic: String, on db: any Database) async throws -> User? {
         try await User.query(on: db)
-            .filter(\.$id == userId)
+            .filter(\.$userCic == userCic)
             .first()
     }
     static func findUser(email: String, provider: AuthProvider, on db: any Database) async throws -> User? {

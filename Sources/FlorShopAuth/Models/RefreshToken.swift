@@ -48,10 +48,7 @@ extension RefreshToken {
             .join(UserSubsidiary.self, on: \RefreshToken.$userSubsidiary.$id == \UserSubsidiary.$id)
             .filter(RefreshToken.self, \.$token == token)
             .filter(UserSubsidiary.self, \.$status == .active) // 👈 solo user_companies activos
-            .with(\.$userSubsidiary) { userSubsidiary in
-                userSubsidiary.with(\.$user)
-                userSubsidiary.with(\.$subsidiary)
-            }
+            .with(\.$userSubsidiary)
             .first()
     }
 }

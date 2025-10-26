@@ -53,4 +53,51 @@ extension Company {
             return false
         }
     }
+    static func validateCompanyNotExist(name: String, subdomain: String, on db: any Database) async throws {
+        // Verificar si existe una compañía con el mismo nombre o subdominio
+        let existingCompany = try await Company.query(on: db)
+            .group(.or) { group in
+                group.filter(\.$name == name)
+                group.filter(\.$subdomain == subdomain)
+            }
+            .first()
+        
+        if let company = existingCompany {
+            if company.name == name {
+                throw Abort(.conflict, reason: "A company with the name '\(name)' already exists.")
+            }
+            if company.subdomain == subdomain {
+                throw Abort(.conflict, reason: "A company with the subdomain '\(subdomain)' already exists.")
+            }
+        }
+    }
+    static func listUserWorkCompanies(userCic: String, on db: any Database) async throws -> [Company] {
+        try await Company.query(on: db)
+            .join(Subsidiary.self, on: \Subsidiary.$company.$id == \Company.$id)
+            .join(UserSubsidiary.self, on: \UserSubsidiary.$subsidiary.$id == \Subsidiary.$id)
+            .join(User.self, on: \User.$id == \UserSubsidiary.$user.$id)
+            .filter(User.self, \.$userCic == userCic)
+            .filter(UserSubsidiary.self, \.$status == .active)
+            .with(\.$user)
+            .with(\.$subsidiaries) { subsidiary in
+                subsidiary.with(\.$userSubsidiaries)
+            }
+            .all()
+    }
+    static func listUserInvitedCompanies(userCic: String, on db: any Database) async throws -> [Company] {
+        try await Company.query(on: db)
+            .join(Subsidiary.self, on: \Subsidiary.$company.$id == \Company.$id)
+            .join(Invitation.self, on: \Invitation.$subsidiary.$id == \Subsidiary.$id)
+            .join(User.self, on: \User.$id == \Invitation.$invitedUser.$id)
+            .filter(User.self, \.$userCic == userCic)
+            .filter(Invitation.self, \.$status == .pending)
+            .filter(Invitation.self, \.$expiredAt < Date())
+            .with(\.$user)
+            .with(\.$subsidiaries) { subsidiary in
+                subsidiary.with(\.$invitations) { invitation in
+                    invitation.with(\.$invitedUser)
+                }
+            }
+            .all()
+    }
 }

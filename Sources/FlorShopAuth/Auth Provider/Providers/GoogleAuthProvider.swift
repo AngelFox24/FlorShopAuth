@@ -60,8 +60,8 @@ actor GoogleAuthProvider: AuthProviderProtocol {
         }
         // 6️⃣ Crear el objeto GoogleUser
         return UserIdentityDTO(
-            id: payload.subject.value,
             email: payload.email,
+            providerId: payload.subject.value,
             name: payload.name,
             picture: payload.picture
         )

@@ -3,38 +3,43 @@ import Vapor
 
 struct AuthController: RouteCollection {
     let authProviderManager: AuthProviderManager
+    let userManipulation: UserManipulation
     func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
+        let refresh = auth.grouped("refresh")
         auth.post(use: authHandler)
+        refresh.post(use: refreshScopedToken)
     }
-
-    //Endpoint: auth/google?origin=pizzarely
-    //Focus in register a new client with a premium pass
+    //Post: auth
     @Sendable
     func authHandler(_ req: Request) async throws -> BaseTokenResponse {
         let authRequest = try req.content.decode(AuthRequest.self)
-        let userIdentityDTO = try await authProviderManager.verifyToken(authRequest.token, using: authRequest.provider, on: req)
-        guard let userIdentity = try await asociateUser(provider: authRequest.provider, userIdentityDTO: userIdentityDTO, on: req.db) else {//asocia si existe
+        let userIdentityDTO: UserIdentityDTO = try await authProviderManager.verifyToken(authRequest.token, using: authRequest.provider, on: req)
+        try await userManipulation.asociateInvitationIfExist(provider: authRequest.provider, userIdentityDTO: userIdentityDTO, on: req.db)
+        guard let user = try await userManipulation.asociateUser(//asocia si existe
+            provider: authRequest.provider,
+            userIdentityDTO: userIdentityDTO,
+            on: req.db
+        ) else {
             throw Abort(.unauthorized, reason: "UserIdentity not found")
         }
-        let user = try await userIdentity.$user.get(on: req.db)
         let tokenString = try await TokenService.generateBaseToken(for: user, req: req)
         return BaseTokenResponse(baseToken: tokenString)
     }
-    private func asociateUser(provider: AuthProvider, userIdentityDTO: UserIdentityDTO, on db: any Database) async throws -> UserIdentity? {
-        let userIdentities = try await UserIdentity.findUserIdentity(email: userIdentityDTO.email, on: db)
-        if let userId = userIdentities.first?.user.id {//Existe usuario con este email
-            if !userIdentities.contains(where: { $0.provider == provider}) {//No existe el proveedor entonces asociamos
-                let newUserIdentity = UserIdentity(
-                    userID: userId,
-                    provider: provider,
-                    providerID: userIdentityDTO.id,
-                    email: userIdentityDTO.email
-                )
-                try await newUserIdentity.save(on: db)
-                return newUserIdentity
-            }
+    //Post: auth/refresh
+    @Sendable
+    func refreshScopedToken(req: Request) async throws -> ScopedTokenResponse {
+        guard let refreshTokenDTO = try? req.content.decode(RefreshTokenRequest.self) else {
+            throw Abort(.badRequest, reason: "Invalid request, need a refresh token")
         }
-        return nil
+        guard let refreshToken = try await RefreshToken.findRefreshScopedToken(token: refreshTokenDTO.refreshScopedToken, on: req.db) else {
+            throw Abort(.unauthorized, reason: "Invalid refresh token")
+        }
+        try refreshToken.validate()
+        let scopedToken = try await TokenService.generateScopedToken(
+            userSubsidiary: refreshToken.userSubsidiary,
+            req: req
+        )
+        return ScopedTokenResponse(scopedToken: scopedToken)
     }
 }
