@@ -39,6 +39,11 @@ extension Company {
 }
 
 extension Company {
+    static func findCompany(companyCic: String, on db: any Database) async throws -> Company? {
+        try await Company.query(on: db)
+            .filter(Company.self, \.$companyCic == companyCic)
+            .first()
+    }
     static func findCompany(subdomain: String, on db: any Database) async throws -> Company? {
         try await Company.query(on: db)
             .filter(Company.self, \.$subdomain == subdomain)

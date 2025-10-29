@@ -25,7 +25,7 @@ struct CompanyController: RouteCollection {
     //Post: company
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
-        let registerDTO = try req.content.decode(RegisterRequest.self)
+        let registerDTO = try req.content.decode(RegisterCompanyRequest.self)
         let userIdentityDTO = try await authProviderManager.verifyToken(
             registerDTO.authentication.token,
             using: registerDTO.authentication.provider,

@@ -119,7 +119,7 @@ struct CompanyManipulation {
         }
         // 2️⃣ Luego, fusionar las invitaciones
         for invited in invitedCompanies {
-            if var existing = mergedCompanies[invited.company_cic] {
+            if let existing = mergedCompanies[invited.company_cic] {
                 // Fusionar subsidiarias sin duplicados
                 var combinedSubs = existing.subsidaries
                 // Agregar solo subsidiarias nuevas
