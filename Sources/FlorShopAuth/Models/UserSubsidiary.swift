@@ -1,9 +1,6 @@
 import Vapor
 import Fluent
-
-enum UserSubsidiaryRole: String, Codable {
-    case cashier, manager, employee, saler
-}
+import FlorShopDTOs
 
 enum SubsidiaryUserStatus: String, Codable {
     case active, pending, inactive

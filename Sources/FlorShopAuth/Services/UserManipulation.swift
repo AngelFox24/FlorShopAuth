@@ -57,8 +57,9 @@ struct UserManipulation {
         guard let userId = user.id else {
             throw Abort(.internalServerError, reason: "No se pudo obtener el ID del usuario recién creado")
         }
-        invitations.forEach { invitation in
+        for invitation in invitations {
             invitation.$invitedUser.id = userId
+            try await invitation.save(on: db)
         }
     }
 }

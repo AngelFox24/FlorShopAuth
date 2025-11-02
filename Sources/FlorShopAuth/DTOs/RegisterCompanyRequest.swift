@@ -1,6 +1,6 @@
 import Foundation
 import Vapor
-import FlorShop_DTOs
+import FlorShopDTOs
 
 struct RegisterCompanyRequest: Content {
     let authentication: AuthenticationDTO
@@ -12,7 +12,7 @@ struct RegisterCompanyRequest: Content {
 
 struct RegisterSubsidiaryRequest: Content {
     let subsidiary: SubsidiaryServerDTO
-    let role: UserSubsidiaryRole
+    let role: FlorShopDTOs.UserSubsidiaryRole
 }
 
 struct AuthenticationDTO: Content {

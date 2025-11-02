@@ -18,7 +18,8 @@ let package = Package(
         // 🔵 Para generar tokens
         .package(url: "https://github.com/vapor/jwt.git", exact: "5.1.2"),
         // 🔵 Shared DTOs
-        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.3")
+        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.4")
+//        .package(path: "../florshop-dtos")
     ],
     targets: [
         .executableTarget(
@@ -30,7 +31,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "JWT", package: "jwt"),
-                .product(name: "FlorShop_DTOs", package: "florshop-dtos")
+                .product(name: "FlorShopDTOs", package: "florshop-dtos")
             ],
             swiftSettings: swiftSettings
         ),

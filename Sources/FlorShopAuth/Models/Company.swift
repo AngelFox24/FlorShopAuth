@@ -96,7 +96,7 @@ extension Company {
             .join(User.self, on: \User.$id == \Invitation.$invitedUser.$id)
             .filter(User.self, \.$userCic == userCic)
             .filter(Invitation.self, \.$status == .pending)
-            .filter(Invitation.self, \.$expiredAt < Date())
+            .filter(Invitation.self, \.$expiredAt >= Date())
             .with(\.$user)
             .with(\.$subsidiaries) { subsidiary in
                 subsidiary.with(\.$invitations) { invitation in

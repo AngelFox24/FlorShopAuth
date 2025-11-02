@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 struct CompanyManipulation {
     func saveCompany(companyName: String, subdomain: String, ownerId: UUID, on db: any Database) async throws -> Company {
@@ -19,7 +20,9 @@ struct CompanyManipulation {
         return newCompany
     }
     func saveSubsidiary(name: String, companyId: UUID, on db: any Database) async throws -> Subsidiary {
-        //TODO: Validate don't exist
+        guard try await !Subsidiary.subsidiaryExist(name: name, companyId: companyId, on: db) else {
+            throw Abort(.badRequest, reason: "This name is already in use")
+        }
         let subsidiaryCic = UUID().uuidString
         let newSusidiary = Subsidiary(
             companyId: companyId,

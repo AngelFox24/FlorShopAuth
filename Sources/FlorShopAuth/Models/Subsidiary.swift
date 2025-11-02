@@ -46,15 +46,17 @@ extension Subsidiary {
     static func findSubsidiary(subsidiaryId: UUID, on db: any Database) async throws -> Subsidiary? {
         try await Subsidiary.find(subsidiaryId, on: db)
     }
-//    static func companyExist(subdomain: String, on db: any Database) async throws -> Bool {
-//        if let _ = try await Company.query(on: db)
-//            .filter(Company.self, \.$subdomain == subdomain)
-//            .first() {
-//            return true
-//        } else {
-//            return false
-//        }
-//    }
+    static func subsidiaryExist(name: String, companyId: UUID, on db: any Database) async throws -> Bool {
+        if let _ = try await Subsidiary.query(on: db)
+            .join(Company.self, on: \Company.$id == \Subsidiary.$company.$id)
+            .filter(Company.self, \.$id == companyId)
+            .filter(Subsidiary.self, \.$name == name)
+            .first() {
+            return true
+        } else {
+            return false
+        }
+    }
 //    static func findUser(subdomain: String, on db: any Database) async throws -> Company? {
 //        try await Company.query(on: db)
 //            .filter(Company.self, \.$subdomain == subdomain)

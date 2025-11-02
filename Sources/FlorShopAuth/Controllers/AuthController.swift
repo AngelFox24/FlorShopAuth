@@ -16,9 +16,14 @@ struct AuthController: RouteCollection {
         let authRequest = try req.content.decode(AuthRequest.self)
         let userIdentityDTO: UserIdentityDTO = try await authProviderManager.verifyToken(authRequest.token, using: authRequest.provider, on: req)
         try await userManipulation.asociateInvitationIfExist(provider: authRequest.provider, userIdentityDTO: userIdentityDTO, on: req.db)
-        guard let user = try await userManipulation.asociateUser(//asocia si existe
+        let _ = try await userManipulation.asociateUser(//asocia si existe
             provider: authRequest.provider,
             userIdentityDTO: userIdentityDTO,
+            on: req.db
+        )
+        guard let user = try await User.findUser(
+            email: userIdentityDTO.email,
+            provider: authRequest.provider,
             on: req.db
         ) else {
             throw Abort(.unauthorized, reason: "UserIdentity not found")

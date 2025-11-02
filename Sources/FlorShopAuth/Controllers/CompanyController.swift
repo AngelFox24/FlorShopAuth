@@ -54,6 +54,9 @@ struct CompanyController: RouteCollection {
             guard let companyId = newCompany.id else {
                 throw Abort(.internalServerError, reason: "Failed to generate id for new company")
             }
+            guard registerDTO.subsidiary.id == nil else {
+                throw Abort(.badGateway, reason: "subsidiary id should not be provided")
+            }
             let newSubsidiary = try await companyManipulation.saveSubsidiary(
                 name: registerDTO.subsidiary.name,
                 companyId: companyId,

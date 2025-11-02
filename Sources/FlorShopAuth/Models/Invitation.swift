@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 enum InvitationStatus: String, Codable {
     case pending
@@ -14,9 +15,9 @@ final class Invitation: Model, @unchecked Sendable {
 
     @ID var id: UUID?
     //Relationships
-    @Parent(key: "invited_by") var invitedBy: User
-    @OptionalParent(key: "invited_user") var invitedUser: User?
-    @Parent(key: "subsidiary") var subsidiary: Subsidiary
+    @Parent(key: "invited_by_user_id") var invitedBy: User
+    @OptionalParent(key: "invited_user_id") var invitedUser: User?
+    @Parent(key: "subsidiary_id") var subsidiary: Subsidiary
     //Atributes
     @Field(key: "email") var email: String
     @Field(key: "role") var role: UserSubsidiaryRole
@@ -64,7 +65,7 @@ extension Invitation {
     }
     static func findPendingInvitationsInSubsidiary(userCic: String, subsidiaryCic: String, on db: any Database) async throws -> Invitation? {
         try await Invitation.query(on: db)
-            .join(Subsidiary.self, on: \Subsidiary.$company.$id == \Invitation.$id)
+            .join(Subsidiary.self, on: \Subsidiary.$id == \Invitation.$subsidiary.$id)
             .join(User.self, on: \Invitation.$invitedUser.$id == \User.$id)
             .filter(Invitation.self, \.$status == .pending)
             .filter(User.self, \.$userCic == userCic)

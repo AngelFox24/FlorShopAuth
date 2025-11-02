@@ -14,20 +14,29 @@ extension Application {
                 tls: .prefer(try .init(configuration: .clientDefault))
             ))
         default://develop
-            return .postgres(configuration: .init(
-                hostname: "192.168.2.7",
-                port: 5433,
-                username: "vapor_username",
-                password: "vapor_password",
-                database: "FlorAuthDB",
-                tls: .disable
-            ))
+            return .postgres(
+                configuration: .init(
+                    hostname: "192.168.2.7",
+                    port: 5433,
+                    username: "vapor_username",
+                    password: "vapor_password",
+                    database: "FlorAuthDB",
+                    tls: .disable)
+            )
         }
     }
     func getDatabaseID() -> DatabaseID {
         switch self.environment {
         default:
             return .psql
+        }
+    }
+    func configLogger() {
+        if let logLevelString = Environment.get("LOG_LEVEL"),
+           let level = Logger.Level(rawValue: logLevelString.lowercased()) {
+            self.logger.logLevel = level
+        } else {
+            self.logger.logLevel = self.environment == .development ? .debug : .info
         }
     }
 }

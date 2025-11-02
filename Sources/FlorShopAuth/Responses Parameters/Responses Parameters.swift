@@ -1,4 +1,5 @@
 import Vapor
+import FlorShopDTOs
 
 struct BaseTokenResponse: Content {
     let baseToken: String
