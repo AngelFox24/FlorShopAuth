@@ -17,6 +17,6 @@ extension AuthProviderManager {
         guard let provider = providers.first(where: { $0.name == providerType }) else {
             throw Abort(.badRequest, reason: "Unsupported provider \(providerType)")
         }
-        return try await provider.verifyToken(token, client: req.client)
+        return try await provider.verifyToken(token, req: req)
     }
 }

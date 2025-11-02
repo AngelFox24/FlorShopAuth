@@ -9,6 +9,7 @@ public func configure(_ app: Application) async throws {
     app.configLogger()
     app.databases.use(try app.getFactory(), as: app.getDatabaseID())
     try await app.setSignature()
+    try await app.setVendorVerficationIdentifiers()
     app.migrations.add(CreateUser())
     app.migrations.add(CreateCompany())
     app.migrations.add(CreateSubsidiary())
