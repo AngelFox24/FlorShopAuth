@@ -1,19 +1,51 @@
 import Vapor
+import JWT
 
 struct AuthController: RouteCollection {
     let authProviderManager: AuthProviderManager
     let userManipulation: UserManipulation
     func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth")
-        let refresh = auth.grouped("refresh")
+        auth.get(use: getKeys)
         auth.post(use: authHandler)
+        let refresh = auth.grouped("refresh")
         refresh.post(use: refreshScopedToken)
+    }
+    //Get: auth
+    func getKeys(req: Request) throws -> Response {
+        guard let publicKeyPath = Environment.get("JWT_PUBLIC_KEY_PATH") else {
+            throw Abort(.internalServerError, reason: "Public key not found")
+        }
+
+        let publicKey = try ES256PublicKey(pem: String(contentsOfFile: publicKeyPath))
+        guard let parameters = publicKey.parameters else {
+            throw Abort(.internalServerError, reason: "Public don't have parameters")
+        }
+        let jwkJSON = """
+        {
+            "keys": [
+                {
+                    "kty": "EC",
+                    "use": "sig",
+                    "alg": "ES256",
+                    "kid": "key1",
+                    "crv": "P-256",
+                    "x": "\(parameters.x)",
+                    "y": "\(parameters.y)"
+                }
+            ]
+        }
+        """
+        let response = Response()
+        response.headers.add(name: .contentType, value: "application/json")
+        response.body = .init(string: jwkJSON)
+        return response
     }
     //Post: auth
     @Sendable
     func authHandler(_ req: Request) async throws -> BaseTokenResponse {
         let authRequest = try req.content.decode(AuthRequest.self)
-        let userIdentityDTO: UserIdentityDTO = try await authProviderManager.verifyToken(authRequest.token, using: authRequest.provider, on: req)
+        let userIdentityDTO: UserIdentityDTO = try await authProviderManager.verifyToken(using: authRequest.provider, on: req)
         try await userManipulation.asociateInvitationIfExist(provider: authRequest.provider, userIdentityDTO: userIdentityDTO, on: req.db)
         let _ = try await userManipulation.asociateUser(//asocia si existe
             provider: authRequest.provider,

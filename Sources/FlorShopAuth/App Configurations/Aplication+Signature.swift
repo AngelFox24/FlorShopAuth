@@ -4,7 +4,7 @@ import JWT
 extension Application {
     public func setSignature() async throws {
         guard let privateKeyPath = Environment.get("JWT_PRIVATE_KEY_PATH") else {
-            throw Abort(.internalServerError, reason: "Internal Server Error")
+            throw Abort(.internalServerError, reason: "Internal Server Error, JWT_PRIVATE_KEY_PATH don't found")
         }
         let privateKey = try ES256PrivateKey(pem: String(contentsOfFile: privateKeyPath))
         await self.jwt.keys.add(ecdsa: privateKey)

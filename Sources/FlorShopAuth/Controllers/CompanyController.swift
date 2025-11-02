@@ -26,14 +26,13 @@ struct CompanyController: RouteCollection {
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
         let registerDTO = try req.content.decode(RegisterCompanyRequest.self)
         let userIdentityDTO = try await authProviderManager.verifyToken(
-            registerDTO.authentication.token,
-            using: registerDTO.authentication.provider,
+            using: registerDTO.provider,
             on: req
         )
         //TODO: Validate Payment
         let userSubsidiary = try await req.db.transaction { transaction -> UserSubsidiary in
             let user: User = try await userManipulation.saveUser(
-                provider: registerDTO.authentication.provider,
+                provider: registerDTO.provider,
                 userIdentityDTO: userIdentityDTO,
                 on: transaction
             )
