@@ -1,4 +1,3 @@
-import Fluent
 import Vapor
 
 struct TestEndpoint: RouteCollection {
@@ -7,11 +6,8 @@ struct TestEndpoint: RouteCollection {
         auth.get(use: testEnpoint)
     }
     
-    struct TestResponse: Content {
-        let result: String
-    }
     @Sendable
-    func testEnpoint(req: Request) throws -> TestResponse {
-        return TestResponse(result: "OK")
+    func testEnpoint(req: Request) throws -> Response {
+        return Response(status: .ok)
     }
 }

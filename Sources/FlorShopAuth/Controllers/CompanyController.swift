@@ -1,4 +1,3 @@
-import Fluent
 import Vapor
 
 struct CompanyController: RouteCollection {
@@ -21,7 +20,7 @@ struct CompanyController: RouteCollection {
         )
         return companies
     }
-
+    
     //Post: company
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {

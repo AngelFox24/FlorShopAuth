@@ -1,4 +1,5 @@
 import Vapor
+
 actor AuthProviderManager {
     private let providers: [any AuthProviderProtocol]
 
@@ -6,6 +7,7 @@ actor AuthProviderManager {
         self.providers = providers
     }
 }
+
 extension AuthProviderManager {
     func verifyToken(
         _ token: String,

@@ -3,10 +3,7 @@ import Fluent
 import FluentPostgresDriver
 import Vapor
 
-// configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.http.server.configuration.hostname = app.getHostname()
     app.http.server.configuration.port = 8081
     app.configLogger()
@@ -21,7 +18,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateRefreshToken())
     //Espera a que la migracion se haga
     try await app.autoMigrate()
-
-    // register routes
+    
     try routes(app)
 }
