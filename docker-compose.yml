@@ -21,7 +21,7 @@ volumes:
 services:
   app:
     image: florshopauth:latest
-    container_name: FlorAuth
+    container_name: FlorShopAuth
     build:
       context: .
     env_file:
@@ -58,7 +58,7 @@ services:
       replicas: 0
   db:
     image: postgres:16-alpine
-    container_name: FlorAuthDB
+    container_name: FlorShopAuthDB
     volumes:
       - db_data:/var/lib/postgresql/data/pgdata
     env_file:

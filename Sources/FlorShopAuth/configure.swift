@@ -5,8 +5,8 @@ import Vapor
 
 public func configure(_ app: Application) async throws {
     app.http.server.configuration.hostname = app.getHostname()
-    app.http.server.configuration.port = 8081
-    app.configLogger()
+    app.http.server.configuration.port = app.getPort()
+    try app.configLogger()
     app.databases.use(try app.getFactory(), as: app.getDatabaseID())
     try await app.setSignature()
     try await app.setVendorVerficationIdentifiers()
