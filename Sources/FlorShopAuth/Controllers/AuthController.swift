@@ -38,6 +38,20 @@ struct AuthController: RouteCollection {
         """
         let response = Response()
         response.headers.add(name: .contentType, value: "application/json")
+        // 1️⃣ Cache-Control: permite que los clientes almacenen la respuesta en cache
+        // max-age = 24 hora (86400 s) como ejemplo
+        response.headers.add(name: .cacheControl, value: "public, max-age=86400")
+        
+        // 2️⃣ ETag: permite validación condicional con If-None-Match
+        let etag = "\"\(jwkJSON.hashValue)\""
+        response.headers.add(name: .eTag, value: etag)
+        
+        // 3️⃣ Comprobación de If-None-Match para responder 304 Not Modified
+        if let ifNoneMatch = req.headers.first(name: .ifNoneMatch), ifNoneMatch == etag {
+            response.status = .notModified
+            response.body = .empty
+            return response
+        }
         response.body = .init(string: jwkJSON)
         return response
     }

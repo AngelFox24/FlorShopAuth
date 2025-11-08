@@ -4,7 +4,7 @@ import JWT
 struct ScopedTokenPayload: JWTPayload {
     var sub: SubjectClaim           // user_cic
     var companyCic: String
-    var subsidiaryCic: String?
+    var subsidiaryCic: String
     var isOwner: Bool
     var type: String
     var iss: IssuerClaim
@@ -14,7 +14,7 @@ struct ScopedTokenPayload: JWTPayload {
     init(
         subject: String,
         companyCic: String,
-        subsidiaryCic: String? = nil,
+        subsidiaryCic: String,
         isOwner: Bool = false,
         issuedAt: Date,
         expiration: Date

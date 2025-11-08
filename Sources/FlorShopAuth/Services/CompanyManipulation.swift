@@ -48,17 +48,14 @@ struct CompanyManipulation {
         let companies = try await Company.listUserWorkCompanies(userCic: userCic, on: db)
         var companiesResponse: [CompanyResponseDTO] = []
         for company in companies {
-            guard let companyId = company.id else { continue }
             var subsidiariesDTO: [SubsidiaryResponseDTO] = []
             for subsidiary in company.subsidiaries {
                 guard subsidiary.userSubsidiaries.count == 1 else {
                     Logger(label: "CompanyManipulation").warning("Subsidiary has more than one userSubsidiary relationship with this user")
                     continue
                 }
-                guard let subsidiaryId = subsidiary.id,
-                let role = subsidiary.userSubsidiaries.first?.role else { continue }
+                guard let role = subsidiary.userSubsidiaries.first?.role else { continue }
                 let subsidiaryDTO = SubsidiaryResponseDTO(
-                    id: subsidiaryId,
                     subsidiary_cic: subsidiary.subsidiaryCic,
                     name: subsidiary.name,
                     subsidiary_role: role
@@ -67,7 +64,6 @@ struct CompanyManipulation {
             }
             guard !subsidiariesDTO.isEmpty else { continue }
             let companyDTO = CompanyResponseDTO(
-                id: companyId,
                 company_cic: company.companyCic,
                 name: company.name,
                 subdomain: company.subdomain,
@@ -82,17 +78,14 @@ struct CompanyManipulation {
         let companies = try await Company.listUserInvitedCompanies(userCic: userCic, on: db)
         var companiesResponse: [CompanyResponseDTO] = []
         for company in companies {
-            guard let companyId = company.id else { continue }
             var subsidiariesDTO: [SubsidiaryResponseDTO] = []
             for subsidiary in company.subsidiaries {
                 guard subsidiary.invitations.count == 1 else {
                     Logger(label: "CompanyManipulation").warning("Subsidiary has more than one invitations to this user")
                     continue
                 }
-                guard let subsidiaryId = subsidiary.id,
-                let role = subsidiary.invitations.first?.role else { continue }
+                guard let role = subsidiary.invitations.first?.role else { continue }
                 let subsidiaryDTO = SubsidiaryResponseDTO(
-                    id: subsidiaryId,
                     subsidiary_cic: subsidiary.subsidiaryCic,
                     name: subsidiary.name,
                     subsidiary_role: role
@@ -101,7 +94,6 @@ struct CompanyManipulation {
             }
             guard !subsidiariesDTO.isEmpty else { continue }
             let companyDTO = CompanyResponseDTO(
-                id: companyId,
                 company_cic: company.companyCic,
                 name: company.name,
                 subdomain: company.subdomain,
@@ -131,7 +123,6 @@ struct CompanyManipulation {
                 }
                 combinedSubs.append(contentsOf: newSubs)
                 let newCompanyResponseDTO = CompanyResponseDTO(
-                    id: existing.id,
                     company_cic: existing.company_cic,
                     name: existing.name,
                     subdomain: existing.subdomain,

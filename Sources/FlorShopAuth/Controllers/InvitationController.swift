@@ -16,8 +16,7 @@ struct InvitationController: RouteCollection {
               let userId = user.id else {
             throw Abort(.badRequest, reason: "user not found")
         }
-        guard let subsidiaryCic = payload.subsidiaryCic,
-              let subsidiary = try await Subsidiary.findSubsidiary(subsidiaryCic: subsidiaryCic, on: req.db),
+        guard let subsidiary = try await Subsidiary.findSubsidiary(subsidiaryCic: payload.subsidiaryCic, on: req.db),
               let subsidiaryId = subsidiary.id else {
             throw Abort(.badRequest, reason: "subsidiary not found")
         }
