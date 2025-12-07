@@ -1,9 +1,6 @@
 import Vapor
 import Fluent
-
-enum AuthProvider: String, Codable {
-    case google, facebook, apple
-}
+import FlorShopDTOs
 
 final class UserIdentity: Model, @unchecked Sendable {
     static let schema = "user_identities"

@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 struct UserManipulation {
     func asociateUser(provider: AuthProvider, userIdentityDTO: UserIdentityDTO, on db: any Database) async throws -> User? {

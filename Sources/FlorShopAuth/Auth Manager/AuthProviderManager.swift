@@ -1,4 +1,5 @@
 import Vapor
+import FlorShopDTOs
 
 actor AuthProviderManager {
     private let providers: [any AuthProviderProtocol]

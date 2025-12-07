@@ -2,6 +2,7 @@ import Foundation
 import Vapor
 import Fluent
 import JWT
+import FlorShopDTOs
 
 struct TokenService {
     static func generateBaseToken(for user: User, req: Request) async throws -> String {
@@ -12,7 +13,7 @@ struct TokenService {
             issuedAt: now,
             expiration: exp
         )
-        let token = try await req.jwt.sign(payload)
+        let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
         return token
     }
     static func generateScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
@@ -30,7 +31,7 @@ struct TokenService {
             issuedAt: now,
             expiration: exp
         )
-        let token = try await req.jwt.sign(payload)
+        let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
         return token
     }
     static func getRefreshScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {

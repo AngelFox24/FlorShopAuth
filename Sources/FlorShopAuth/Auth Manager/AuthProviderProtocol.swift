@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 protocol AuthProviderProtocol: Sendable {
     var name: AuthProvider { get }

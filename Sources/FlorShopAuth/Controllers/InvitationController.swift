@@ -1,4 +1,5 @@
 import Vapor
+import FlorShopDTOs
 
 struct InvitationController: RouteCollection {
     let authProviderManager: AuthProviderManager

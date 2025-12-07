@@ -58,6 +58,15 @@ extension Company {
             return false
         }
     }
+    static func companyNameExist(name: String, on db: any Database) async throws -> Bool {
+        if let _ = try await Company.query(on: db)
+            .filter(Company.self, \.$name == name)
+            .first() {
+            return true
+        } else {
+            return false
+        }
+    }
     static func validateCompanyNotExist(name: String, subdomain: String, on db: any Database) async throws {
         // Verificar si existe una compañía con el mismo nombre o subdominio
         let existingCompany = try await Company.query(on: db)

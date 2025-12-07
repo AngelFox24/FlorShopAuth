@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 final class User: Model, @unchecked Sendable {
     static let schema = "users"

@@ -1,5 +1,6 @@
 import Vapor
 import JWT
+import FlorShopDTOs
 
 actor AppleAuthProvider: AuthProviderProtocol {
     let name = AuthProvider.apple

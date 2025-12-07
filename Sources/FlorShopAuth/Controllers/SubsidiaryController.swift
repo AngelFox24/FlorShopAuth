@@ -1,4 +1,5 @@
 import Vapor
+import FlorShopDTOs
 
 struct SubsidiaryController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -7,7 +8,11 @@ struct SubsidiaryController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let subsidiary = routes.grouped("subsidiary")
         subsidiary.get(use: selectSubsidiary)
-        subsidiary.post(use: registerSubsidiary)
+        subsidiary.post(use: saveSubsidiary)
+//        let register = subsidiary.grouped("register")
+//        register.post(use: registerSubsidiary)
+        let userSubsidiary = routes.grouped("usersubsidiary")
+        userSubsidiary.post(use: updateUserSubsidiary)
     }
     //Get: subsidiary?id=89fsa78978as78ga789
     @Sendable
@@ -56,40 +61,67 @@ struct SubsidiaryController: RouteCollection {
         let refreshScopedToken = try await TokenService.getRefreshScopedToken(userSubsidiary: userSubsidiary, req: req)
         return ScopedTokenWithRefreshResponse(scopedToken: tokenString, refreshScopedToken: refreshScopedToken)
     }
-    //Post: subsidiary
+    //POST: subsidiary
     @Sendable
-    func registerSubsidiary(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
+    func saveSubsidiary(_ req: Request) async throws -> DefaultResponse {
+        let payload = try await req.jwt.verify(as: InternalPayload.self)
         let registerDTO = try req.content.decode(RegisterSubsidiaryRequest.self)
-        // Obtener el usuario autenticado del JWT
-        let payload = try await req.jwt.verify(as: ScopedTokenPayload.self)
+        
         let userCic = payload.sub.value
-        let userSubsidiary = try await req.db.transaction { transaction -> UserSubsidiary in
-            guard let user: User = try await User.findUser(userCic: userCic, on: transaction),
-                  let userId = user.id else {
-                throw Abort(.internalServerError, reason: "Failed to find user")
+        try await req.db.transaction { transaction in
+            if let subsidiaryCic = registerDTO.subsidiary.subsidiaryCic {//Enviar el subsidiaryCic tiene la intencion de actualizar
+                //Update
+                guard let subsidiary = try await Subsidiary.findSubsidiary(subsidiaryCic: subsidiaryCic, on: req.db) else {
+                    throw Abort(.badRequest, reason: "Subsidiary no encontrado para actualizar")
+                }
+                guard try await Subsidiary.subsidiaryNameExist(name: registerDTO.subsidiary.name, on: req.db) else {
+                    throw Abort(.badRequest, reason: "Subsidiary name already exist")
+                }
+                subsidiary.name = registerDTO.subsidiary.name
+                try await subsidiary.save(on: req.db)
+            } else {//Create
+                guard let user: User = try await User.findUser(userCic: userCic, on: transaction),
+                      let userId = user.id else {
+                    throw Abort(.internalServerError, reason: "Failed to find user")
+                }
+                guard let company = try await Company.findCompany(companyCic: payload.companyCic, on: transaction),
+                      let companyId = company.id else {
+                    throw Abort(.internalServerError, reason: "Failed to find company")
+                }
+                let newSubsidiary = try await companyManipulation.saveSubsidiary(
+                    name: registerDTO.subsidiary.name,
+                    companyId: companyId,
+                    on: transaction
+                )
+                guard let subsidiaryId = newSubsidiary.id else {
+                    throw Abort(.internalServerError, reason: "Failed to generate id for new subsidiary")
+                }
+                let _ = try await companyManipulation.asingUserToSubsidiary(
+                    userId: userId,
+                    subsidiaryId: subsidiaryId,
+                    role: registerDTO.role,
+                    on: transaction
+                )
             }
-            guard let company = try await Company.findCompany(companyCic: payload.companyCic, on: transaction),
-                  let companyId = company.id else {
-                throw Abort(.internalServerError, reason: "Failed to find company")
-            }
-            let newSubsidiary = try await companyManipulation.saveSubsidiary(
-                name: registerDTO.subsidiary.name,
-                companyId: companyId,
-                on: transaction
-            )
-            guard let subsidiaryId = newSubsidiary.id else {
-                throw Abort(.internalServerError, reason: "Failed to generate id for new subsidiary")
-            }
-            let userSubsidiary = try await companyManipulation.asingUserToSubsidiary(
-                userId: userId,
-                subsidiaryId: subsidiaryId,
-                role: registerDTO.role,
-                on: transaction
-            )
-            return userSubsidiary
         }
-        let tokenString = try await TokenService.generateScopedToken(userSubsidiary: userSubsidiary, req: req)
-        let refreshScopedToken = try await TokenService.getRefreshScopedToken(userSubsidiary: userSubsidiary, req: req)
-        return ScopedTokenWithRefreshResponse(scopedToken: tokenString, refreshScopedToken: refreshScopedToken)
+        return DefaultResponse()
+    }
+    //Post: usersubsidiary
+    @Sendable
+    func updateUserSubsidiary(_ req: Request) async throws -> DefaultResponse {
+        let payload = try await req.jwt.verify(as: InternalPayload.self)
+        let updateRequest = try req.content.decode(UpdateUserSubsidiaryRequest.self)
+        //TODO: Validar si el payload.sub.value (employeeCic) tiene suficientes privilegios para cambiar privilegios a otros
+        guard let userSubsidiary = try await UserSubsidiary.getSubsidiaryWhereUserWorks(
+            userCic: updateRequest.employeeCic,
+            subsidiaryCic: payload.subsidiaryCic,
+            on: req.db
+        ) else {
+            throw Abort(.badRequest, reason: "UserSubsidiary don't exist")
+        }
+        userSubsidiary.role = updateRequest.role
+        userSubsidiary.status = updateRequest.status
+        try await userSubsidiary.save(on: req.db)
+        return DefaultResponse()
     }
 }

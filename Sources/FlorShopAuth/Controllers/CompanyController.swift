@@ -1,4 +1,5 @@
 import Vapor
+import FlorShopDTOs
 
 struct CompanyController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -7,7 +8,9 @@ struct CompanyController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let company = routes.grouped("company")
         company.get(use: getUserCompanies)
-        company.post(use: registerCompany)
+        company.post(use: updateCompany)
+        let register = company.grouped("register")
+        register.post(use: registerCompany)
     }
     
     //Get: company
@@ -20,8 +23,22 @@ struct CompanyController: RouteCollection {
         )
         return companies
     }
-    
     //Post: company
+    @Sendable
+    func updateCompany(_ req: Request) async throws -> DefaultResponse {
+        let payload = try await req.jwt.verify(as: InternalPayload.self)
+        let companyDTO = try req.content.decode(CompanyServerDTO.self)
+        guard try await !Company.companyNameExist(name: companyDTO.companyName, on: req.db) else {
+            throw Abort(.badRequest, reason: "Company name already exist")
+        }
+        guard let company = try await Company.findCompany(companyCic: payload.companyCic, on: req.db) else {
+            throw Abort(.badRequest, reason: "Company not found")
+        }
+        company.name = companyDTO.companyName
+        try await company.save(on: req.db)
+        return DefaultResponse()
+    }
+    //Post: company/register
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
         let registerDTO = try req.content.decode(RegisterCompanyRequest.self)
@@ -39,9 +56,6 @@ struct CompanyController: RouteCollection {
             guard let userId = user.id else {
                 throw Abort(.internalServerError, reason: "Failed to generate Id for user")
             }
-            guard registerDTO.company.id == nil else {
-                throw Abort(.badGateway, reason: "company id should not be provided")
-            }
             //user want to create a new company
             let newCompany = try await companyManipulation.saveCompany(
                 companyName: registerDTO.company.companyName,
@@ -51,9 +65,6 @@ struct CompanyController: RouteCollection {
             )
             guard let companyId = newCompany.id else {
                 throw Abort(.internalServerError, reason: "Failed to generate id for new company")
-            }
-            guard registerDTO.subsidiary.id == nil else {
-                throw Abort(.badGateway, reason: "subsidiary id should not be provided")
             }
             let newSubsidiary = try await companyManipulation.saveSubsidiary(
                 name: registerDTO.subsidiary.name,

@@ -1,5 +1,6 @@
 import Vapor
 import JWT
+import FlorShopDTOs
 
 actor GoogleAuthProvider: AuthProviderProtocol {
     let name = AuthProvider.google    

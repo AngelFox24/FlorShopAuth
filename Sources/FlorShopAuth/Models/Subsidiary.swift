@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 final class Subsidiary: Model, @unchecked Sendable {
     static let schema = "subsidiaries"
@@ -45,6 +46,15 @@ extension Subsidiary {
     }
     static func findSubsidiary(subsidiaryId: UUID, on db: any Database) async throws -> Subsidiary? {
         try await Subsidiary.find(subsidiaryId, on: db)
+    }
+    static func subsidiaryNameExist(name: String, on db: any Database) async throws -> Bool {
+        if let _ = try await Subsidiary.query(on: db)
+            .filter(Subsidiary.self, \.$name == name)
+            .first() {
+            return true
+        } else {
+            return false
+        }
     }
     static func subsidiaryExist(name: String, companyId: UUID, on db: any Database) async throws -> Bool {
         if let _ = try await Subsidiary.query(on: db)

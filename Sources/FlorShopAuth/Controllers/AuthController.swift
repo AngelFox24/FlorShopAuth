@@ -1,5 +1,6 @@
 import Vapor
 import JWT
+import FlorShopDTOs
 
 struct AuthController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -13,8 +14,8 @@ struct AuthController: RouteCollection {
     }
     //Get: auth
     func getKeys(req: Request) throws -> Response {
-        guard let publicKeyPath = Environment.get("JWT_PUBLIC_KEY_PATH") else {
-            throw Abort(.internalServerError, reason: "Public key not found")
+        guard let publicKeyPath = Environment.get(EnvironmentVariables.jwtEcdsaExternalPublicKeyPath.rawValue) else {//Se obtiene en el momento porque se espera que un futuro rote las claves
+            throw Abort(.internalServerError, reason: "Public key \(EnvironmentVariables.jwtEcdsaExternalPublicKeyPath.rawValue) not found in .env.***")
         }
 
         let publicKey = try ES256PublicKey(pem: String(contentsOfFile: publicKeyPath))
@@ -82,7 +83,7 @@ struct AuthController: RouteCollection {
         guard let refreshTokenDTO = try? req.content.decode(RefreshTokenRequest.self) else {
             throw Abort(.badRequest, reason: "Invalid request, need a refresh token")
         }
-        guard let refreshToken = try await RefreshToken.findRefreshScopedToken(token: refreshTokenDTO.refreshScopedToken, on: req.db) else {
+        guard let refreshToken = try await RefreshToken.findRefreshScopedToken(token: refreshTokenDTO.refreshToken, on: req.db) else {
             throw Abort(.unauthorized, reason: "Invalid refresh token")
         }
         try refreshToken.validate()

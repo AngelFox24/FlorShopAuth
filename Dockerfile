@@ -87,9 +87,9 @@ ENV SWIFT_BACKTRACE=enable=yes,sanitize=yes,threads=all,images=all,interactive=n
 # Ensure all further commands run as the vapor user
 USER vapor:vapor
 
-# Let Docker bind to port 8081
-EXPOSE 8081
+# Let Docker bind to port 8080
+EXPOSE 8080
 
-# Start the Vapor service when the image is run, default to listening on 8081 in production environment
+# Start the Vapor service when the image is run, default to listening on 8080 in production environment
 ENTRYPOINT ["./FlorShopAuth"]
-CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8081"]
+CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]

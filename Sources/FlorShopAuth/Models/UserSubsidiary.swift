@@ -2,10 +2,6 @@ import Vapor
 import Fluent
 import FlorShopDTOs
 
-enum SubsidiaryUserStatus: String, Codable {
-    case active, pending, inactive
-}
-
 final class UserSubsidiary: Model, Content, @unchecked Sendable {
     static let schema = "user_subsidiary"
 
