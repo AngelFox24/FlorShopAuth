@@ -62,4 +62,7 @@ extension RefreshToken {
             throw Abort(.forbidden, reason: "Refresh token has expired.")
         }
     }
+    func isValid() -> Bool {
+        !revoked && expiresAt > Date()
+    }
 }

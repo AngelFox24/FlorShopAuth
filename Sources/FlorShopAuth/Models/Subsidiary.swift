@@ -67,9 +67,28 @@ extension Subsidiary {
             return false
         }
     }
-//    static func findUser(subdomain: String, on db: any Database) async throws -> Company? {
-//        try await Company.query(on: db)
-//            .filter(Company.self, \.$subdomain == subdomain)
-//            .first()
-//    }
+    static func listUserWorkSubsidiaries(userCic: String, companyCic: String, on db: any Database) async throws -> [Subsidiary] {
+        try await Subsidiary.query(on: db)
+            .join(Company.self, on: \Subsidiary.$company.$id == \Company.$id)
+            .join(UserSubsidiary.self, on: \UserSubsidiary.$subsidiary.$id == \Subsidiary.$id)
+            .join(User.self, on: \User.$id == \UserSubsidiary.$user.$id)
+            .filter(Company.self, \.$companyCic == companyCic)
+            .filter(User.self, \.$userCic == userCic)
+            .filter(UserSubsidiary.self, \.$status == .active)
+            .with(\.$userSubsidiaries)
+            .all()
+    }
+    
+    static func listUserInvitedSubsidiaries(userCic: String, companyCic: String, on db: any Database) async throws -> [Subsidiary] {
+        try await Subsidiary.query(on: db)
+            .join(Company.self, on: \Subsidiary.$company.$id == \Company.$id)
+            .join(Invitation.self, on: \Invitation.$subsidiary.$id == \Subsidiary.$id)
+            .join(User.self, on: \User.$id == \Invitation.$invitedUser.$id)
+            .filter(Company.self, \.$companyCic == companyCic)
+            .filter(User.self, \.$userCic == userCic)
+            .filter(Invitation.self, \.$status == .pending)
+            .filter(Invitation.self, \.$expiredAt >= Date())
+            .with(\.$userSubsidiaries)
+            .all()
+    }
 }

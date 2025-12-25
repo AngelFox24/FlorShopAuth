@@ -6,6 +6,7 @@ struct ScopedTokenPayload: JWTPayload {
     var companyCic: String
     var subsidiaryCic: String
     var isOwner: Bool
+    let subdomain: String
     var type: String
     var iss: IssuerClaim
     var iat: IssuedAtClaim
@@ -16,6 +17,7 @@ struct ScopedTokenPayload: JWTPayload {
         companyCic: String,
         subsidiaryCic: String,
         isOwner: Bool = false,
+        subdomain: String,
         issuedAt: Date,
         expiration: Date
     ) {
@@ -23,6 +25,7 @@ struct ScopedTokenPayload: JWTPayload {
         self.companyCic = companyCic
         self.subsidiaryCic = subsidiaryCic
         self.isOwner = isOwner
+        self.subdomain = subdomain
         self.type = "scoped"
         self.iss = .init(value: "FlorShopAuth")
         self.iat = .init(value: issuedAt)

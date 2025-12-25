@@ -93,9 +93,9 @@ extension Company {
             .filter(User.self, \.$userCic == userCic)
             .filter(UserSubsidiary.self, \.$status == .active)
             .with(\.$user)
-            .with(\.$subsidiaries) { subsidiary in
-                subsidiary.with(\.$userSubsidiaries)
-            }
+//            .with(\.$subsidiaries) { subsidiary in
+//                subsidiary.with(\.$userSubsidiaries)
+//            }
             .all()
     }
     static func listUserInvitedCompanies(userCic: String, on db: any Database) async throws -> [Company] {
@@ -107,11 +107,11 @@ extension Company {
             .filter(Invitation.self, \.$status == .pending)
             .filter(Invitation.self, \.$expiredAt >= Date())
             .with(\.$user)
-            .with(\.$subsidiaries) { subsidiary in
-                subsidiary.with(\.$invitations) { invitation in
-                    invitation.with(\.$invitedUser)
-                }
-            }
+//            .with(\.$subsidiaries) { subsidiary in
+//                subsidiary.with(\.$invitations) { invitation in
+//                    invitation.with(\.$invitedUser)
+//                }
+//            }
             .all()
     }
 }

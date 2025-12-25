@@ -7,17 +7,34 @@ struct SubsidiaryController: RouteCollection {
     let companyManipulation: CompanyManipulation
     func boot(routes: any RoutesBuilder) throws {
         let subsidiary = routes.grouped("subsidiary")
-        subsidiary.get(use: selectSubsidiary)
+        subsidiary.get(use: getUserSubsidiaries)
         subsidiary.post(use: saveSubsidiary)
+        let selecction = subsidiary.grouped("selection")
+        selecction.get(use: selectSubsidiary)
 //        let register = subsidiary.grouped("register")
 //        register.post(use: registerSubsidiary)
         let userSubsidiary = routes.grouped("usersubsidiary")
         userSubsidiary.post(use: updateUserSubsidiary)
     }
-    //Get: subsidiary?id=89fsa78978as78ga789
+    
+    //Get: subsidiary?companyCic=89fsa78978as78ga789
+    @Sendable
+    func getUserSubsidiaries(_ req: Request) async throws -> [SubsidiaryResponseDTO] {
+        guard let companyCic = try? req.query.get(String.self, at: "companyCic") else {
+            throw Abort(.badRequest, reason: "Must specify a subsidiary id")
+        }
+        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let subsidiaries: [SubsidiaryResponseDTO] = try await companyManipulation.getUserSubsidiariesWithInvitations(
+            userCic: payload.sub.value,
+            companyCic: companyCic,
+            on: req.db
+        )
+        return subsidiaries
+    }
+    //Get: subsidiary/selection?cic=89fsa78978as78ga789
     @Sendable
     func selectSubsidiary(req: Request) async throws -> ScopedTokenWithRefreshResponse {
-        guard let subsidiaryCic = try? req.query.get(String.self, at: "id") else { //?id=89af76f789a9f6aga789
+        guard let subsidiaryCic = try? req.query.get(String.self, at: "cic") else {
             throw Abort(.badRequest, reason: "Must specify a subsidiary id")
         }
         // Obtener el usuario autenticado del JWT
@@ -58,7 +75,7 @@ struct SubsidiaryController: RouteCollection {
         }
         //TODO: Cuando selecciona una subsidiaria donde aun no se ha registrado, entonces hay que registrarlo
         let tokenString = try await TokenService.generateScopedToken(userSubsidiary: userSubsidiary, req: req)
-        let refreshScopedToken = try await TokenService.getRefreshScopedToken(userSubsidiary: userSubsidiary, req: req)
+        let refreshScopedToken = try await TokenService.getRefreshScopedToken(userSubsidiary: userSubsidiary, req: req)//Buuuuug si vencio el refresh token se malogra todo
         return ScopedTokenWithRefreshResponse(scopedToken: tokenString, refreshScopedToken: refreshScopedToken)
     }
     //POST: subsidiary
