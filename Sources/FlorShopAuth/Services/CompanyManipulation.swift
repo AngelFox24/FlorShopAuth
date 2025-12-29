@@ -43,36 +43,6 @@ struct CompanyManipulation {
         try await newUserSubsidiary.save(on: db)
         return newUserSubsidiary
     }
-//    func getUserCompanies(userCic: String, on db: any Database) async throws -> [CompanyResponseDTO] {
-//        let companies = try await Company.listUserWorkCompanies(userCic: userCic, on: db)
-//        var companiesResponse: [CompanyResponseDTO] = []
-//        for company in companies {
-//            var subsidiariesDTO: [SubsidiaryResponseDTO] = []
-//            for subsidiary in company.subsidiaries {
-//                guard subsidiary.userSubsidiaries.count == 1 else {
-//                    Logger(label: "CompanyManipulation").warning("Subsidiary has more than one userSubsidiary relationship with this user")
-//                    continue
-//                }
-//                guard let role = subsidiary.userSubsidiaries.first?.role else { continue }
-//                let subsidiaryDTO = SubsidiaryResponseDTO(
-//                    subsidiary_cic: subsidiary.subsidiaryCic,
-//                    name: subsidiary.name,
-//                    subsidiary_role: role
-//                )
-//                subsidiariesDTO.append(subsidiaryDTO)
-//            }
-//            guard !subsidiariesDTO.isEmpty else { continue }
-//            let companyDTO = CompanyResponseDTO(
-//                company_cic: company.companyCic,
-//                name: company.name,
-//                subdomain: company.subdomain,
-//                is_company_owner: company.user.userCic == userCic,
-//                subsidaries: subsidiariesDTO
-//            )
-//            companiesResponse.append(companyDTO)
-//        }
-//        return companiesResponse
-//    }
     func getUserCompanies(userCic: String, on db: any Database) async throws -> [CompanyResponseDTO] {
         let companies = try await Company.listUserWorkCompanies(userCic: userCic, on: db)
         var companiesResponse: [CompanyResponseDTO] = []
@@ -101,36 +71,6 @@ struct CompanyManipulation {
         }
         return subsidiaryResponse
     }
-//    func getUserInvitations(userCic: String, on db: any Database) async throws -> [CompanyResponseDTO] {
-//        let companies = try await Company.listUserInvitedCompanies(userCic: userCic, on: db)
-//        var companiesResponse: [CompanyResponseDTO] = []
-//        for company in companies {
-//            var subsidiariesDTO: [SubsidiaryResponseDTO] = []
-//            for subsidiary in company.subsidiaries {
-//                guard subsidiary.invitations.count == 1 else {
-//                    Logger(label: "CompanyManipulation").warning("Subsidiary has more than one invitations to this user")
-//                    continue
-//                }
-//                guard let role = subsidiary.invitations.first?.role else { continue }
-//                let subsidiaryDTO = SubsidiaryResponseDTO(
-//                    subsidiary_cic: subsidiary.subsidiaryCic,
-//                    name: subsidiary.name,
-//                    subsidiary_role: role
-//                )
-//                subsidiariesDTO.append(subsidiaryDTO)
-//            }
-//            guard !subsidiariesDTO.isEmpty else { continue }
-//            let companyDTO = CompanyResponseDTO(
-//                company_cic: company.companyCic,
-//                name: company.name,
-//                subdomain: company.subdomain,
-//                is_company_owner: company.user.userCic == userCic,
-//                subsidaries: subsidiariesDTO
-//            )
-//            companiesResponse.append(companyDTO)
-//        }
-//        return companiesResponse
-//    }
     func getUserCompaniesInvitations(userCic: String, on db: any Database) async throws -> [CompanyResponseDTO] {
         let companies = try await Company.listUserInvitedCompanies(userCic: userCic, on: db)
         var companiesResponse: [CompanyResponseDTO] = []
@@ -167,7 +107,7 @@ struct CompanyManipulation {
             mergedCompanies[company.company_cic] = company
         }
         for invited in invitedCompanies {
-            if mergedCompanies.contains(where: { $0.key == invited.company_cic }) {
+            if !mergedCompanies.contains(where: { $0.key == invited.company_cic }) {
                 mergedCompanies[invited.company_cic] = invited
             }
         }
@@ -181,7 +121,7 @@ struct CompanyManipulation {
             mergedSubsidiaries[subsidiary.subsidiary_cic] = subsidiary
         }
         for invited in invitedSubsidiaries {
-            if mergedSubsidiaries.contains(where: { $0.key == invited.subsidiary_cic }) {
+            if !mergedSubsidiaries.contains(where: { $0.key == invited.subsidiary_cic }) {
                 mergedSubsidiaries[invited.subsidiary_cic] = invited
             }
         }
