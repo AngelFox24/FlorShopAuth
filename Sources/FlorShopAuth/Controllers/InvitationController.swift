@@ -10,7 +10,7 @@ struct InvitationController: RouteCollection {
     }
     //Post: invitation
     @Sendable
-    func registerInvitation(_ req: Request) async throws -> Response {
+    func registerInvitation(_ req: Request) async throws -> DefaultResponse {
         let payload = try await req.jwt.verify(as: ScopedTokenPayload.self)//Validate token
         //TODO: Validate ScopedToken role
         guard let user = try await User.findUser(userCic: payload.sub.value, on: req.db),
@@ -35,6 +35,6 @@ struct InvitationController: RouteCollection {
             expiredAt: expirationData
         )
         try await newInvitation.save(on: req.db)
-        return Response(status: .ok)
+        return DefaultResponse()
     }
 }
