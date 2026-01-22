@@ -23,13 +23,11 @@ struct TokenService {
         let subsidiary = try await userSubsidiary.$subsidiary.get(on: req.db)
         let company = try await subsidiary.$company.get(on: req.db)
         let owner = try await company.$user.get(on: req.db)
-        let subdomain = try await TokenService.getSubdomain(for: userSubsidiary, req: req)
         let payload = ScopedTokenPayload(
             subject: user.userCic,
             companyCic: company.companyCic,
             subsidiaryCic: subsidiary.subsidiaryCic,
             isOwner: owner.userCic == user.userCic,
-            subdomain: subdomain,
             issuedAt: now,
             expiration: exp
         )

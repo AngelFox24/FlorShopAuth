@@ -29,7 +29,7 @@ struct AuthController: RouteCollection {
                     "kty": "EC",
                     "use": "sig",
                     "alg": "ES256",
-                    "kid": "key1",
+                    "kid": "external-key",
                     "crv": "P-256",
                     "x": "\(parameters.x)",
                     "y": "\(parameters.y)"

@@ -3,10 +3,10 @@ import JWT
 
 struct ScopedTokenPayload: JWTPayload {
     var sub: SubjectClaim           // user_cic
+    var aud: AudienceClaim
     var companyCic: String
     var subsidiaryCic: String
     var isOwner: Bool
-    let subdomain: String
     var type: String
     var iss: IssuerClaim
     var iat: IssuedAtClaim
@@ -17,17 +17,16 @@ struct ScopedTokenPayload: JWTPayload {
         companyCic: String,
         subsidiaryCic: String,
         isOwner: Bool = false,
-        subdomain: String,
         issuedAt: Date,
         expiration: Date
     ) {
         self.sub = .init(value: subject)
+        self.aud = .init(value: ["FlorShopCore"])
         self.companyCic = companyCic
         self.subsidiaryCic = subsidiaryCic
         self.isOwner = isOwner
-        self.subdomain = subdomain
         self.type = "scoped"
-        self.iss = .init(value: "FlorShopAuth")
+        self.iss = .init(value: "https://auth.mrangel.dev")
         self.iat = .init(value: issuedAt)
         self.exp = .init(value: expiration)
     }
