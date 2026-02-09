@@ -13,6 +13,8 @@ enum EnvironmentVariables: String {
     case jwtHmacInternalKey = "JWT_HMAC_INTERNAL_KEY"
     case jwtEcdsaExternalPrivateKeyPath = "JWT_ECDSA_EXTERNAL_PRIVATE_KEY_PATH"
     case jwtEcdsaExternalPublicKeyPath = "JWT_ECDSA_EXTERNAL_PUBLIC_KEY_PATH"
+    case jwtAudience = "JWT_AUDIENCE"
+    case jwtIssuer = "JWT_ISSUER"
 }
 
 extension EnvironmentVariables: CaseIterable {

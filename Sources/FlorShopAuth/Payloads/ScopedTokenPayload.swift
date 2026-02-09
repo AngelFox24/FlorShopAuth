@@ -14,19 +14,21 @@ struct ScopedTokenPayload: JWTPayload {
 
     init(
         subject: String,
+        aud: String,
         companyCic: String,
         subsidiaryCic: String,
         isOwner: Bool = false,
+        iss: String,
         issuedAt: Date,
         expiration: Date
     ) {
         self.sub = .init(value: subject)
-        self.aud = .init(value: ["FlorShopCore"])
+        self.aud = .init(value: [aud])
         self.companyCic = companyCic
         self.subsidiaryCic = subsidiaryCic
         self.isOwner = isOwner
         self.type = "scoped"
-        self.iss = .init(value: "https://auth.mrangel.dev")
+        self.iss = .init(value: iss)
         self.iat = .init(value: issuedAt)
         self.exp = .init(value: expiration)
     }

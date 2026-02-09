@@ -17,6 +17,11 @@ struct TokenService {
         return token
     }
     static func generateScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
+        guard let aud = Environment.get(EnvironmentVariables.jwtAudience.rawValue),
+              let iss = Environment.get(EnvironmentVariables.jwtIssuer.rawValue)
+        else {
+            fatalError("JWT_AUDIENCE or JWT_ISSUER not set")
+        }
         let now = Date()
         let exp = now.addingTimeInterval(3600) // 1 hora
         let user = try await userSubsidiary.$user.get(on: req.db)
@@ -25,9 +30,11 @@ struct TokenService {
         let owner = try await company.$user.get(on: req.db)
         let payload = ScopedTokenPayload(
             subject: user.userCic,
+            aud: aud,
             companyCic: company.companyCic,
             subsidiaryCic: subsidiary.subsidiaryCic,
             isOwner: owner.userCic == user.userCic,
+            iss: iss,
             issuedAt: now,
             expiration: exp
         )
