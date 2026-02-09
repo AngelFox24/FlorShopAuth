@@ -34,13 +34,6 @@ struct TokenService {
         let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
         return token
     }
-    private static func getSubdomain(for userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
-        try await userSubsidiary.$subsidiary.load(on: req.db)
-        let subsidiary = userSubsidiary.subsidiary
-        try await subsidiary.$company.load(on: req.db)
-        let company = subsidiary.company
-        return company.subdomain
-    }
     static func getRefreshScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
         let subsidiary = try await userSubsidiary.$subsidiary.get(on: req.db)
         let user = try await userSubsidiary.$user.get(on: req.db)

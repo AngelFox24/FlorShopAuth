@@ -59,7 +59,6 @@ struct CompanyController: RouteCollection {
             //user want to create a new company
             let newCompany = try await companyManipulation.saveCompany(
                 companyName: registerDTO.company.companyName,
-                subdomain: registerDTO.subdomain,
                 ownerId: userId,
                 on: transaction
             )

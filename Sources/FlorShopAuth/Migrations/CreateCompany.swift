@@ -7,10 +7,9 @@ struct CreateCompany: AsyncMigration {
             .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
             .field("company_cic", .string, .required)
             .field("name", .string, .required)
-            .field("subdomain", .string, .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
-            .unique(on: "subdomain")
+            .unique(on: "company_cic")
             .create()
     }
 

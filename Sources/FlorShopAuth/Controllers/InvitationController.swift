@@ -27,7 +27,7 @@ struct InvitationController: RouteCollection {
         //TODO: Validar que no existe ese usuario como invitado
         let newInvitation = Invitation(
             invitedByUserId: userId,
-            invitedUserId: invitedUser?.id,//si el usuario invitado si tiene registro se le asigna
+            invitedUserId: invitedUser?.user.id,//si el usuario invitado si tiene registro se le asigna
             subsidiaryId: subsidiaryId,
             email: invitationRequest.email,
             role: invitationRequest.role,

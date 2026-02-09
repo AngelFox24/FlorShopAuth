@@ -3,18 +3,16 @@ import Fluent
 import FlorShopDTOs
 
 struct CompanyManipulation {
-    func saveCompany(companyName: String, subdomain: String, ownerId: UUID, on db: any Database) async throws -> Company {
+    func saveCompany(companyName: String, ownerId: UUID, on db: any Database) async throws -> Company {
         try await Company.validateCompanyNotExist(
             name: companyName,
-            subdomain: subdomain,
             on: db
         )
         let companyCic = UUID().uuidString
         let newCompany = Company(
             userId: ownerId,
             companyCic: companyCic,
-            name: companyName,
-            subdomain: subdomain
+            name: companyName
         )
         try await newCompany.save(on: db)
         return newCompany
@@ -50,7 +48,6 @@ struct CompanyManipulation {
             let companyDTO = CompanyResponseDTO(
                 company_cic: company.companyCic,
                 name: company.name,
-                subdomain: company.subdomain,
                 is_company_owner: company.user.userCic == userCic
             )
             companiesResponse.append(companyDTO)
@@ -78,7 +75,6 @@ struct CompanyManipulation {
             let companyDTO = CompanyResponseDTO(
                 company_cic: company.companyCic,
                 name: company.name,
-                subdomain: company.subdomain,
                 is_company_owner: company.user.userCic == userCic
             )
             companiesResponse.append(companyDTO)

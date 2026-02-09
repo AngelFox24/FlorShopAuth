@@ -10,7 +10,6 @@ final class Company: Model, @unchecked Sendable {
     
     @Field(key: "company_cic") var companyCic: String
     @Field(key: "name") var name: String
-    @Field(key: "subdomain") var subdomain: String
 
     @Children(for: \.$company) var subsidiaries: [Subsidiary]
 
@@ -22,13 +21,11 @@ final class Company: Model, @unchecked Sendable {
     init(
         userId: UUID,
         companyCic: String,
-        name: String,
-        subdomain: String
+        name: String
     ) {
         self.$user.id = userId
         self.companyCic = companyCic
         self.name = name
-        self.subdomain = subdomain
     }
 }
 
@@ -44,20 +41,6 @@ extension Company {
             .filter(Company.self, \.$companyCic == companyCic)
             .first()
     }
-    static func findCompany(subdomain: String, on db: any Database) async throws -> Company? {
-        try await Company.query(on: db)
-            .filter(Company.self, \.$subdomain == subdomain)
-            .first()
-    }
-    static func companyExist(subdomain: String, on db: any Database) async throws -> Bool {
-        if let _ = try await Company.query(on: db)
-            .filter(Company.self, \.$subdomain == subdomain)
-            .first() {
-            return true
-        } else {
-            return false
-        }
-    }
     static func companyNameExist(name: String, on db: any Database) async throws -> Bool {
         if let _ = try await Company.query(on: db)
             .filter(Company.self, \.$name == name)
@@ -67,21 +50,17 @@ extension Company {
             return false
         }
     }
-    static func validateCompanyNotExist(name: String, subdomain: String, on db: any Database) async throws {
+    static func validateCompanyNotExist(name: String, on db: any Database) async throws {
         // Verificar si existe una compañía con el mismo nombre o subdominio
         let existingCompany = try await Company.query(on: db)
             .group(.or) { group in
                 group.filter(\.$name == name)
-                group.filter(\.$subdomain == subdomain)
             }
             .first()
         
         if let company = existingCompany {
             if company.name == name {
                 throw Abort(.conflict, reason: "A company with the name '\(name)' already exists.")
-            }
-            if company.subdomain == subdomain {
-                throw Abort(.conflict, reason: "A company with the subdomain '\(subdomain)' already exists.")
             }
         }
     }

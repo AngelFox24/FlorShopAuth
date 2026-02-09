@@ -32,24 +32,6 @@ final class UserSubsidiary: Model, Content, @unchecked Sendable {
 }
 
 extension UserSubsidiary {
-//    static func findOwnerUserCompany(
-//        provider: AuthProvider,
-//        providerID: String,
-//        subdomain: String,
-//        on db: any Database
-//    ) async throws -> UserSubsidiary? {
-//        try await UserSubsidiary.query(on: db)
-//            .join(User.self, on: \UserSubsidiary.$user.$id == \User.$id)
-//            .join(UserIdentity.self, on: \UserSubsidiary.$user.$id == \UserIdentity.$user.$id)
-//            .join(Company.self, on: \UserSubsidiary.$subsidiary.$id == \Company.$id)
-//            .filter(UserIdentity.self, \.$provider == provider)
-//            .filter(UserIdentity.self, \.$providerID == providerID)
-//            .filter(\.$role == .owner)
-//            .filter(Company.self, \.$subdomain == subdomain)
-//            .with(\.$user)
-//            .with(\.$subsidiary)
-//            .first()
-//    }
     static func findCompanies(for userId: UUID, on db: any Database) async throws -> [Company] {
         let subsidiaries = try await UserSubsidiary.query(on: db)
             .filter(\.$user.$id == userId)
