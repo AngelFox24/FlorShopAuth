@@ -5,7 +5,6 @@ func routes(_ app: Application) throws {
     let userManipulation = UserManipulation()
     let companyManipulation = CompanyManipulation()
     
-    try app.register(collection: TestEndpoint())
     try app.register(collection: InvitationController(
         authProviderManager: authProviderManager,
         userManipulation: userManipulation))

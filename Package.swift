@@ -18,7 +18,7 @@ let package = Package(
         // 🔵 Para generar tokens
         .package(url: "https://github.com/vapor/jwt.git", exact: "5.1.2"),
         // 🔵 Shared DTOs
-        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.19")
+        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.21")
 //        .package(path: "../florshop-dtos")
     ],
     targets: [

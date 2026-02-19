@@ -17,3 +17,4 @@ extension RefreshTokenRequest: @retroactive Content {}
 extension BaseTokenResponse: @retroactive Content {}
 extension ScopedTokenResponse: @retroactive Content {}
 extension ScopedTokenWithRefreshResponse: @retroactive Content {}
+extension InitialDataDTO: @retroactive Content {}

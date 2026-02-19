@@ -15,6 +15,8 @@ struct SubsidiaryController: RouteCollection {
 //        register.post(use: registerSubsidiary)
         let userSubsidiary = routes.grouped("usersubsidiary")
         userSubsidiary.post(use: updateUserSubsidiary)
+        let initalData = routes.grouped("initialData")
+        initalData.get(use: getInitialData)
     }
     
     //Get: subsidiary?companyCic=89fsa78978as78ga789
@@ -123,7 +125,7 @@ struct SubsidiaryController: RouteCollection {
         }
         return DefaultResponse()
     }
-    //Post: usersubsidiary
+    //POST: usersubsidiary
     @Sendable
     func updateUserSubsidiary(_ req: Request) async throws -> DefaultResponse {
         let payload = try await req.jwt.verify(as: InternalPayload.self)
@@ -140,5 +142,34 @@ struct SubsidiaryController: RouteCollection {
         userSubsidiary.status = updateRequest.status
         try await userSubsidiary.save(on: req.db)
         return DefaultResponse()
+    }
+    //GET: initialData?subsidiaryCic=8sfa8978fsa09fa0fsa
+    @Sendable
+    func getInitialData(_ req: Request) async throws -> InitialDataDTO {
+        guard let subsidiaryCic = try? req.query.get(String.self, at: "subsidiaryCic") else {
+            throw Abort(.badRequest, reason: "Must specify a subsidiaryCic")
+        }
+        guard let subsidiaryEntity = try await Subsidiary.findSubsidiary(subsidiaryCic: subsidiaryCic, on: req.db) else {
+            throw Abort(.badRequest, reason: "Subsidiary don't exist for this subsidiaryCic")
+        }
+        try await subsidiaryEntity.$company.load(on: req.db)
+        let companyEntity = subsidiaryEntity.company
+        return InitialDataDTO(
+            company: .init(
+                companyCic: companyEntity.companyCic,
+                companyName: companyEntity.name,
+                ruc: "",
+                createdAt: companyEntity.createdAt ?? Date(),
+                updatedAt: companyEntity.updatedAt ?? Date()
+            ),
+            subsidiary: .init(
+                subsidiaryCic: subsidiaryEntity.subsidiaryCic,
+                name: subsidiaryEntity.name,
+                companyCic: companyEntity.companyCic,
+                imageUrl: nil,
+                createdAt: subsidiaryEntity.createdAt ?? Date(),
+                updatedAt: subsidiaryEntity.updatedAt ?? Date()
+            )
+        )
     }
 }
