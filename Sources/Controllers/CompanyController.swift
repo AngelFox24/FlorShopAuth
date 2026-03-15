@@ -41,18 +41,13 @@ struct CompanyController: RouteCollection {
     //Post: company/register
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
+        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
         let registerDTO = try req.content.decode(RegisterCompanyRequest.self)
-        let userIdentityDTO = try await authProviderManager.verifyToken(
-            using: registerDTO.provider,
-            on: req
-        )
         //TODO: Validate Payment
         let userSubsidiary = try await req.db.transaction { transaction -> UserSubsidiary in
-            let user: User = try await userManipulation.saveUser(
-                provider: registerDTO.provider,
-                userIdentityDTO: userIdentityDTO,
-                on: transaction
-            )
+            guard let user: User = try await User.findUser(userCic: payload.sub.value, on: transaction) else {
+                throw Abort(.badRequest, reason: "User not exist")
+            }
             guard let userId = user.id else {
                 throw Abort(.internalServerError, reason: "Failed to generate Id for user")
             }

@@ -48,7 +48,8 @@ struct CompanyManipulation {
             let companyDTO = CompanyResponseDTO(
                 company_cic: company.companyCic,
                 name: company.name,
-                is_company_owner: company.user.userCic == userCic
+                is_company_owner: company.user.userCic == userCic,
+                suscription: nil//TODO: Create table suscriptions
             )
             companiesResponse.append(companyDTO)
         }
@@ -75,7 +76,8 @@ struct CompanyManipulation {
             let companyDTO = CompanyResponseDTO(
                 company_cic: company.companyCic,
                 name: company.name,
-                is_company_owner: company.user.userCic == userCic
+                is_company_owner: company.user.userCic == userCic,
+                suscription: nil//TODO: Create table suscriptions
             )
             companiesResponse.append(companyDTO)
         }
