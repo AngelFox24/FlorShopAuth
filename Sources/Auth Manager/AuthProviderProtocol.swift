@@ -5,4 +5,5 @@ import FlorShopDTOs
 protocol AuthProviderProtocol: Sendable {
     var name: AuthProvider { get }
     func verifyToken(req: Request) async throws -> UserIdentityDTO
+    func verifyToken(token: String, req: Request) async throws -> UserIdentityDTO
 }

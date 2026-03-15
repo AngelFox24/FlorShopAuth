@@ -1,0 +1,21 @@
+import Vapor
+import JWT
+import FlorShopDTOs
+
+//actor AppleAuthProvider: AuthProviderProtocol {
+//    let name = AuthProvider.apple
+//    func verifyToken(req: Request) async throws -> UserIdentityDTO {
+//        let token: AppleIdentityToken = try await req.jwt.apple.verify()
+//        guard let userIdentityDTO = token.toUserIdentityDTO() else {
+//            throw Abort(.unauthorized, reason: "apple token malformatted")
+//        }
+//        return userIdentityDTO
+//    }
+//    func verifyToken(token: String, req: Vapor.Request) async throws -> UserIdentityDTO {
+//        let token: AppleIdentityToken = try await req.jwt.apple.verify(token)
+//        guard let userIdentityDTO = token.toUserIdentityDTO() else {
+//            throw Abort(.unauthorized, reason: "apple token malformatted")
+//        }
+//        return userIdentityDTO
+//    }
+//}

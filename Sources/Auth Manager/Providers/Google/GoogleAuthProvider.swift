@@ -11,4 +11,11 @@ actor GoogleAuthProvider: AuthProviderProtocol {
         }
         return userIdentityDTO
     }
+    func verifyToken(token: String, req: Request) async throws -> UserIdentityDTO {
+        let token: GoogleIdentityToken = try await req.jwt.google.verify(token)
+        guard let userIdentityDTO = token.toUserIdentityDTO() else {
+            throw Abort(.unauthorized, reason: "google token malformatted")
+        }
+        return userIdentityDTO
+    }
 }

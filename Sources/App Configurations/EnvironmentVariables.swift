@@ -10,11 +10,14 @@ enum EnvironmentVariables: String {
     case dataBaseUserName = "DATABASE_USERNAME"
     case dataBasePassword = "DATABASE_PASSWORD"
     case googleClientId = "GOOGLE_CLIENT_ID"
+    case googleClientSecret = "GOOGLE_CLIENT_SECRET"
+    case googleRedirectUri = "GOOGLE_REDIRECT_URI"
     case jwtHmacInternalKey = "JWT_HMAC_INTERNAL_KEY"
     case jwtEcdsaExternalPrivateKeyPath = "JWT_ECDSA_EXTERNAL_PRIVATE_KEY_PATH"
     case jwtEcdsaExternalPublicKeyPath = "JWT_ECDSA_EXTERNAL_PUBLIC_KEY_PATH"
     case jwtAudience = "JWT_AUDIENCE"
     case jwtIssuer = "JWT_ISSUER"
+    case florShopWebBaseURL = "FLORSHOP_WEB_BASE_URL"
 }
 
 extension EnvironmentVariables: CaseIterable {
