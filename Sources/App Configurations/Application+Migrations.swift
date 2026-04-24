@@ -11,5 +11,7 @@ extension Application {
         self.migrations.add(CreateUserIdentity())
         self.migrations.add(CreateRefreshToken())
         self.migrations.add(CreateAuthorizationCode())
+        self.migrations.add(CreateInternalService())
+        self.migrations.add(UpdateUserBillingParams())
     }
 }

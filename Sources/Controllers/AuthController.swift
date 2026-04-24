@@ -10,6 +10,8 @@ struct AuthController: RouteCollection {
         let auth = routes.grouped("auth")
         auth.get(use: getKeys)
         auth.post(use: authHandler)
+        let free = auth.grouped("free")
+        free.get(use: authHandlerFree)
         let refresh = auth.grouped("refresh")
         refresh.post(use: refreshScopedToken)
         let google = auth.grouped("google")
@@ -18,6 +20,11 @@ struct AuthController: RouteCollection {
         exchange.post(use: exchangeAuthCodeForToken)
         let googleCallbakc = google.grouped("callback")
         googleCallbakc.get(use: googleCallback)
+        let internalService = auth.grouped("service-token")
+        internalService.post(use: getServiceToken)
+        let completeInfo = auth.grouped("complete-info")
+        completeInfo.get(use: getAdditionalInfo)
+        completeInfo.post(use: postAdditionalInfo)
     }
     //MARK: Get: auth
     func getKeys(req: Request) throws -> Response {
@@ -84,6 +91,18 @@ struct AuthController: RouteCollection {
         let tokenString = try await TokenService.generateBaseToken(for: user, req: req)
         return BaseTokenResponse(baseToken: tokenString)
     }
+    //MARK: GET: auth/free?userCic=
+    @Sendable
+    func authHandlerFree(_ req: Request) async throws -> BaseTokenResponse {
+        guard let userCic = try? req.query.get(String.self, at: "userCic") else {
+            throw Abort(.badRequest, reason: "Must specify a subsidiary id")
+        }
+        guard let user = try await User.findUser(userCic: userCic, on: req.db) else {
+            throw Abort(.unauthorized, reason: "UserIdentity not found")
+        }
+        let tokenString = try await TokenService.generateBaseToken(for: user, req: req)
+        return BaseTokenResponse(baseToken: tokenString)
+    }
     //MARK: Post: auth/refresh
     @Sendable
     func refreshScopedToken(req: Request) async throws -> ScopedTokenResponse {
@@ -131,16 +150,25 @@ struct AuthController: RouteCollection {
             userIdentityDTO: userIdentityDTO,
             on: req.db
         )
-        guard let user = try await User.findUser(
+        let userNN: User
+        if let user = try await User.findUser(
             email: userIdentityDTO.email,
             provider: .google,
             on: req.db
-        ) else {
-            throw Abort(.unauthorized, reason: "UserIdentity not found")
+        ) {
+            userNN = user
+        } else {//Creamos un nuevo usuario
+            userNN = try await self.userManipulation.saveUser(provider: .google, userIdentityDTO: userIdentityDTO, on: req.db)
         }
-        let tokenString = try await TokenService.generateBaseToken(for: user, req: req)
+        let tokenString = try await TokenService.generateBaseToken(for: userNN, req: req)
+        let randomData = Data((0..<32).map { _ in UInt8.random(in: 0...255) })
+        let base64URL = randomData.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+
         let newAuthCode = AuthorizationCode(
-            code: Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString(),
+            code: base64URL,
             baseToken: tokenString,
             expiredAt: Date().addingTimeInterval(60)
         )
@@ -158,6 +186,52 @@ struct AuthController: RouteCollection {
         let codeExchangeReq = try req.content.decode(CodeExchangeRequest.self)
         let baseToken = try await AuthorizationCode.use(code: codeExchangeReq.code, on: req.db)
         return BaseTokenResponse(baseToken: baseToken)
+    }
+    //MARK: Post: auth/service-token
+    @Sendable
+    func getServiceToken(req: Request) async throws -> InternalTokenResponse {
+        guard let dto = try? req.content.decode(InternalTokenRequest.self) else {
+            throw Abort(.badRequest, reason: "Invalid request")
+        }
+        guard let service = try await InternalService.find(serviceName: dto.service, password: dto.password, db: req.db) else {
+            throw Abort(.unauthorized, reason: "Invalid credentials")
+        }
+        let token = try await TokenService.generateInternalServiceToken(for: service, req: req)
+        return token
+    }
+    //MARK: GET: auth/complete-info
+    @Sendable
+    func getAdditionalInfo(req: Request) async throws -> AuthAdditionalInfoResponse {//AuthAdditionalInfoRequest
+        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        guard let user = try await User.findUser(userCic: payload.sub.value, on: req.db) else {
+            throw Abort(.badRequest, reason: "User not found")
+        }
+        try await user.$identities.load(on: req.db)
+        guard let email = user.identities.first?.email else {
+            throw Abort(.conflict, reason: "User email not found")
+        }
+        return AuthAdditionalInfoResponse(
+            email: email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneNumber: user.phoneNumber
+        )
+    }
+    //MARK: POST: auth/complete-info
+    @Sendable
+    func postAdditionalInfo(req: Request) async throws -> DefaultResponse {
+        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        guard let dto = try? req.content.decode(AuthAdditionalInfoRequest.self) else {
+            throw Abort(.badRequest, reason: "Invalid request")
+        }
+        guard let user = try await User.findUser(userCic: payload.sub.value, on: req.db) else {
+            throw Abort(.badRequest, reason: "User not found")
+        }
+        user.firstName = dto.firstName
+        user.lastName = dto.lastName
+        user.phoneNumber = dto.phoneNumber
+        try await user.save(on: req.db)
+        return DefaultResponse()
     }
     private func exchangeCodeForToken(code: String, req: Request) async throws -> GoogleToken {
         guard

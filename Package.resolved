@@ -1,5 +1,5 @@
 {
-  "originHash" : "8c1f0be4f12eb8850e2a51484538e391cc3747e00d9bbb46b70b25ca47976e03",
+  "originHash" : "75f3f2f1176dc95b4935fc263b169585770643c4d5abcd7add77d96938b81061",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -29,12 +29,30 @@
       }
     },
     {
+      "identity" : "florshop-auth-client",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AngelFox24/florshop-auth-client.git",
+      "state" : {
+        "revision" : "d7644290b623518b899d366d4514c2ddd1e734f2",
+        "version" : "0.0.5"
+      }
+    },
+    {
       "identity" : "florshop-dtos",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AngelFox24/florshop-dtos.git",
       "state" : {
-        "revision" : "3cbdaf73b2dda4af267074da78ae467646febe19",
-        "version" : "1.0.25"
+        "branch" : "feature/add-create-culqi-orders",
+        "revision" : "23169256178c5224d7e02f81d7b68bc83e8a676f"
+      }
+    },
+    {
+      "identity" : "florshop-networking",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AngelFox24/florshop-networking.git",
+      "state" : {
+        "revision" : "75ef7ae5eeacb86233ba49fda74a957b787eb714",
+        "version" : "0.0.4"
       }
     },
     {

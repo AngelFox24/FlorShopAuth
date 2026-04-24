@@ -13,7 +13,7 @@ struct CompanyController: RouteCollection {
         register.post(use: registerCompany)
     }
     
-    //Get: company
+    //GET: company
     @Sendable
     func getUserCompanies(_ req: Request) async throws -> [CompanyResponseDTO] {
         let payload = try await req.jwt.verify(as: BaseTokenPayload.self)

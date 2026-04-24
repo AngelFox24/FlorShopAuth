@@ -17,9 +17,14 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🔵 Para generar tokens
         .package(url: "https://github.com/vapor/jwt.git", exact: "5.1.2"),
+        // 🔵 Extension para validar FlorShopAuth
+        .package(url: "https://github.com/AngelFox24/florshop-auth-client.git", exact: "0.0.5"),
+        // 🔵 Extension para Networking
+        .package(url: "https://github.com/AngelFox24/florshop-networking.git", exact: "0.0.4"),
         // 🔵 Shared DTOs
-        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.25")
-//        .package(path: "../florshop-dtos")
+//        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.27")
+        //        .package(path: "../florshop-dtos")
+            .package(url: "https://github.com/AngelFox24/florshop-dtos.git", branch: "feature/add-create-culqi-orders")
     ],
     targets: [
         .executableTarget(
@@ -31,7 +36,9 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "JWT", package: "jwt"),
-                .product(name: "FlorShopDTOs", package: "florshop-dtos")
+                .product(name: "FlorShopDTOs", package: "florshop-dtos"),
+                .product(name: "FlorShopAuthClient", package: "florshop-auth-client"),
+                .product(name: "FlorShopNetworking", package: "florshop-networking")
             ],
             swiftSettings: swiftSettings
         ),

@@ -10,6 +10,7 @@ public func configure(_ app: Application) async throws {
     app.setJsonDecoder()
     app.databases.use(app.getFactory(), as: app.getDatabaseID())
     try await app.setSignature()
+    await app.configNetworkLog()
     app.setVendorVerficationIdentifiers()
     app.addCorsMiddleware()
     app.configureMigrations()

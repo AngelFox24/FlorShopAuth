@@ -3,6 +3,7 @@ import Vapor
 import Fluent
 import JWT
 import FlorShopDTOs
+import FlorShopAuthClient
 
 struct TokenService {
     static func generateBaseToken(for user: User, req: Request) async throws -> String {
@@ -16,11 +17,28 @@ struct TokenService {
         let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
         return token
     }
+    static func generateInternalServiceToken(for service: InternalService, req: Request) async throws -> InternalTokenResponse {
+        guard let iss = Environment.get(EnvironmentVariables.florShopJwtIssuer.rawValue) else {
+            throw Abort(.internalServerError, reason: "JWT_ISSUER not configured")
+        }
+        let now = Date()
+        let exp = now.addingTimeInterval(1200) // 20 minutos
+        let payload = FlorShopAuthClient.InternalServiceTokenPayload(
+            subject: service.serviceName,
+            aud: TokenAudience.internalService,
+            iss: iss,
+            issuedAt: now,
+            expiration: exp,
+            scope: service.scopes
+        )
+        let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
+        return InternalTokenResponse(serviceToken: token, expiry: exp)
+    }
     static func generateScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
-        guard let aud = Environment.get(EnvironmentVariables.jwtAudience.rawValue),
-              let iss = Environment.get(EnvironmentVariables.jwtIssuer.rawValue)
+        guard let aud = Environment.get(EnvironmentVariables.florShopJwtAudience.rawValue),
+              let iss = Environment.get(EnvironmentVariables.florShopJwtIssuer.rawValue)
         else {
-            fatalError("JWT_AUDIENCE or JWT_ISSUER not set")
+            throw Abort(.internalServerError, reason: "JWT_AUDIENCE or JWT_ISSUER not configured")
         }
         let now = Date()
         let exp = now.addingTimeInterval(3600) // 1 hora

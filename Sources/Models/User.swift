@@ -8,6 +8,9 @@ final class User: Model, @unchecked Sendable {
     @ID var id: UUID?
 
     @Field(key: "user_cic") var userCic: String
+    @Field(key: "first_name") var firstName: String?
+    @Field(key: "last_name") var lastName: String?
+    @Field(key: "phone_number") var phoneNumber: String?
     
     @Children(for: \.$user) var identities: [UserIdentity]
     @Children(for: \.$user) var subsidiaries: [UserSubsidiary]
@@ -17,8 +20,16 @@ final class User: Model, @unchecked Sendable {
 
     init() {}
     
-    init(userCic: String) {
+    init(
+        userCic: String,
+        firstName: String? = nil,
+        lastName: String? = nil,
+        phoneNumber: String? = nil
+    ) {
         self.userCic = userCic
+        self.firstName = firstName
+        self.lastName = lastName
+        self.phoneNumber = phoneNumber
     }
 }
 
