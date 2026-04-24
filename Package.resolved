@@ -1,5 +1,5 @@
 {
-  "originHash" : "4e1abd8d60f52902ed362f96dfd63e9a016e4727081606e490950b52906a1167",
+  "originHash" : "eb30c765c862c29b1273aa32f342ef7e03c7cce2a33ccf212d194cc7fe2d2578",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AngelFox24/florshop-networking.git",
       "state" : {
-        "revision" : "e9fbad09ca00a92fc76894bf61f2496544ea3ab9",
-        "version" : "0.0.5"
+        "revision" : "e9cdad901787bef4f4fad7cdb3fa9c958130b525",
+        "version" : "0.0.6"
       }
     },
     {

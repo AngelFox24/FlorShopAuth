@@ -20,7 +20,7 @@ let package = Package(
         // 🔵 Extension para validar FlorShopAuth
         .package(url: "https://github.com/AngelFox24/florshop-auth-client.git", exact: "0.0.6"),
         // 🔵 Extension para Networking
-        .package(url: "https://github.com/AngelFox24/florshop-networking.git", exact: "0.0.5"),
+        .package(url: "https://github.com/AngelFox24/florshop-networking.git", exact: "0.0.6"),
         // 🔵 Shared DTOs
 //        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.27")
         //        .package(path: "../florshop-dtos")
