@@ -11,6 +11,7 @@ struct CompanyManipulation {
         let companyCic = UUID().uuidString
         let newCompany = Company(
             userId: ownerId,
+            suscriptionID: nil,
             companyCic: companyCic,
             name: companyName
         )

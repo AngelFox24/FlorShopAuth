@@ -1,6 +1,3 @@
-import NIOSSL
-import Fluent
-import FluentPostgresDriver
 import Vapor
 
 public func configure(_ app: Application) async throws {
@@ -11,10 +8,12 @@ public func configure(_ app: Application) async throws {
     app.databases.use(app.getFactory(), as: app.getDatabaseID())
     try await app.setSignature()
     await app.configNetworkLog()
+    app.addValkey()
     app.setVendorVerficationIdentifiers()
     app.addCorsMiddleware()
     app.configureMigrations()
     //Espera a que la migracion se haga
     try await app.autoMigrate()
     try routes(app)
+    streams(app)
 }

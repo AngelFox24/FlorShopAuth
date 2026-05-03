@@ -13,5 +13,9 @@ extension Application {
         self.migrations.add(CreateAuthorizationCode())
         self.migrations.add(CreateInternalService())
         self.migrations.add(UpdateUserBillingParams())
+        self.migrations.add(CreatePlan())
+        self.migrations.add(CreatePlanFeature())
+        self.migrations.add(CreateSuscription())
+        self.migrations.add(UpdateCompanyParams())
     }
 }

@@ -34,6 +34,26 @@ struct TokenService {
         let token = try await req.jwt.sign(payload, kid: JWTKeyID.externalService.kid)
         return InternalTokenResponse(serviceToken: token, expiry: exp)
     }
+    static func generateInternalServiceToken(for service: InternalService, app: Application) async throws -> InternalTokenResponse {
+        guard let iss = Environment.get(EnvironmentVariables.florShopJwtIssuer.rawValue) else {
+            throw Abort(.internalServerError, reason: "JWT_ISSUER not configured")
+        }
+        let now = Date()
+        let exp = now.addingTimeInterval(1200) // 20 minutos
+        let payload = FlorShopAuthClient.InternalServiceTokenPayload(
+            subject: service.serviceName,
+            aud: TokenAudience.internalService,
+            iss: iss,
+            issuedAt: now,
+            expiration: exp,
+            scope: service.scopes
+        )
+        let token = try await Self.signPayload(payload, kid: JWTKeyID.externalService.kid, app: app)
+        return InternalTokenResponse(serviceToken: token, expiry: exp)
+    }
+    static func signPayload(_ payload: InternalServiceTokenPayload, kid: JWKIdentifier, app: Application) async throws -> String {
+        try await app.jwt.keys.sign(payload, kid: kid)
+    }
     static func generateScopedToken(userSubsidiary: UserSubsidiary, req: Request) async throws -> String {
         guard let aud = Environment.get(EnvironmentVariables.florShopJwtAudience.rawValue),
               let iss = Environment.get(EnvironmentVariables.florShopJwtIssuer.rawValue)

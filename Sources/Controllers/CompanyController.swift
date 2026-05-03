@@ -13,7 +13,7 @@ struct CompanyController: RouteCollection {
         register.post(use: registerCompany)
     }
     
-    //GET: company
+    //MARK: GET: company
     @Sendable
     func getUserCompanies(_ req: Request) async throws -> [CompanyResponseDTO] {
         let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
@@ -23,7 +23,7 @@ struct CompanyController: RouteCollection {
         )
         return companies
     }
-    //Post: company
+    //MARK: POST: company
     @Sendable
     func updateCompany(_ req: Request) async throws -> DefaultResponse {
         let payload = try await req.jwt.verify(as: InternalPayload.self)
@@ -38,7 +38,7 @@ struct CompanyController: RouteCollection {
         try await company.save(on: req.db)
         return DefaultResponse()
     }
-    //Post: company/register
+    //MARK: POST: company/register
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
         let payload = try await req.jwt.verify(as: BaseTokenPayload.self)

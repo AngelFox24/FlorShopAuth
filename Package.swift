@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "FlorShopAuth",
     platforms: [
-       .macOS(.v13)
+       .macOS(.v15)
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -17,14 +17,21 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🔵 Para generar tokens
         .package(url: "https://github.com/vapor/jwt.git", exact: "5.1.2"),
+        // 🔵 Valkey Swift
+        .package(url: "https://github.com/valkey-io/valkey-swift", from: "1.3.2"),
+        // 🔵 Valkey Vapor
+        .package(url: "https://github.com/vapor-community/valkey.git", from: "1.2.0"),
         // 🔵 Extension para validar FlorShopAuth
         .package(url: "https://github.com/AngelFox24/florshop-auth-client.git", exact: "0.0.6"),
         // 🔵 Extension para Networking
         .package(url: "https://github.com/AngelFox24/florshop-networking.git", exact: "0.0.6"),
+        // 🔵 Extension para Valkey Streams
+//        .package(url: "https://github.com/AngelFox24/florshop-valkey.git", exact: "0.0.1"),
+                .package(path: "../florshop-valkey"),
         // 🔵 Shared DTOs
 //        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.27")
         //        .package(path: "../florshop-dtos")
-            .package(url: "https://github.com/AngelFox24/florshop-dtos.git", branch: "feature/add-create-culqi-orders")
+            .package(url: "https://github.com/AngelFox24/florshop-dtos.git", branch: "feature/add-valkey")
     ],
     targets: [
         .executableTarget(
@@ -38,7 +45,10 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "FlorShopDTOs", package: "florshop-dtos"),
                 .product(name: "FlorShopAuthClient", package: "florshop-auth-client"),
-                .product(name: "FlorShopNetworking", package: "florshop-networking")
+                .product(name: "FlorShopNetworking", package: "florshop-networking"),
+                .product(name: "FlorShopValkey", package: "florshop-valkey"),
+                .product(name: "Valkey", package: "valkey-swift"),
+                .product(name: "VaporValkey", package: "valkey")
             ],
             swiftSettings: swiftSettings
         ),

@@ -7,7 +7,7 @@ final class Company: Model, @unchecked Sendable {
     @ID var id: UUID?
 
     @Parent(key: "user_id") var user: User
-    
+    @OptionalParent(key: "subscription_id") var subscription: Suscription?
     @Field(key: "company_cic") var companyCic: String
     @Field(key: "name") var name: String
 
@@ -20,10 +20,12 @@ final class Company: Model, @unchecked Sendable {
     
     init(
         userId: UUID,
+        suscriptionID: UUID?,
         companyCic: String,
         name: String
     ) {
         self.$user.id = userId
+        self.$subscription.id = suscriptionID
         self.companyCic = companyCic
         self.name = name
     }
