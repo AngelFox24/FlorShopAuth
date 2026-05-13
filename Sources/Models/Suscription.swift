@@ -75,7 +75,16 @@ extension Suscription {
             suscriptionCic: self.suscriptionCic,
             companyCic: self.companyCic,
             suscriptionExpireAt: self.endAt,
-            planCic: self.plan.planCic
+            planCic: self.plan.planCic,
+            status: self.status
+        )
+    }
+    func toClientDTO() -> SuscriptionClientDTO {
+        SuscriptionClientDTO(
+            suscriptionCic: self.suscriptionCic,
+            suscriptionExpireAt: self.endAt,
+            planName: self.plan.name,
+            planPrice: Money(self.plan.price)
         )
     }
 }

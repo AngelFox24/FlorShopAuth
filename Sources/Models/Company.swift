@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import FlorShopDTOs
 
 final class Company: Model, @unchecked Sendable {
     static let schema = "companies"
@@ -35,12 +36,32 @@ extension Company {
     func getOwner(on db: any Database) async throws -> User {
         return try await $user.get(on: db)
     }
+    func toDTO(userCic: String) -> CompanyResponseDTO {
+        CompanyResponseDTO(
+            company_cic: self.companyCic,
+            name: self.name,
+            is_company_owner: self.user.userCic == userCic,
+            suscription: self.subscription?.toClientDTO()
+        )
+    }
 }
 
 extension Company {
     static func findCompany(companyCic: String, on db: any Database) async throws -> Company? {
         try await Company.query(on: db)
             .filter(Company.self, \.$companyCic == companyCic)
+            .first()
+    }
+    //Only if user is owner
+    static func getUserCompany(companyCic: String, userCic: String, on db: any Database) async throws -> Company? {
+        try await Company.query(on: db)
+            .join(User.self, on: \User.$id == \Company.$user.$id)
+            .filter(Company.self, \.$companyCic == companyCic)
+            .filter(User.self, \.$userCic == userCic)
+            .with(\.$user)
+            .with(\.$subscription) { sub in
+                sub.with(\.$plan)
+            }
             .first()
     }
     static func companyNameExist(name: String, on db: any Database) async throws -> Bool {

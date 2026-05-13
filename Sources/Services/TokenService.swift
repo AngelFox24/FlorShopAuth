@@ -6,9 +6,9 @@ import FlorShopDTOs
 import FlorShopAuthClient
 
 struct TokenService {
-    static func generateBaseToken(for user: User, req: Request) async throws -> String {
+    static func generateBaseToken(for user: User, timeInterval: Double = 3600, req: Request) async throws -> String {
         let now = Date()
-        let exp = now.addingTimeInterval(3600) // 1 hora
+        let exp = now.addingTimeInterval(timeInterval) // 1 hora
         let payload = BaseTokenPayload(
             subject: user.userCic,
             issuedAt: now,

@@ -80,6 +80,7 @@ struct BillingStreamHandler: StreamHandler {
             //Update suscription
             print("[changeSuscription] Actualizando nueva suscripcion companyCic: \(dto.companyCic)")
             suscription.endAt = dto.suscriptionExpireAt
+            suscription.status = dto.status
             suscription.$plan.id = planId
             try await suscription.save(on: tx)
         } else {

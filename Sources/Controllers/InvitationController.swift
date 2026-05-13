@@ -1,5 +1,6 @@
 import Vapor
 import FlorShopDTOs
+import FlorShopAuthClient
 
 struct InvitationController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -11,13 +12,13 @@ struct InvitationController: RouteCollection {
     //Post: invitation
     @Sendable
     func registerInvitation(_ req: Request) async throws -> DefaultResponse {
-        let payload = try await req.jwt.verify(as: ScopedTokenPayload.self)//Validate token
+        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken()
         //TODO: Validate ScopedToken role
-        guard let user = try await User.findUser(userCic: payload.sub.value, on: req.db),
+        guard let user = try await User.findUser(userCic: scopedToken.sub.value, on: req.db),
               let userId = user.id else {
             throw Abort(.badRequest, reason: "user not found")
         }
-        guard let subsidiary = try await Subsidiary.findSubsidiary(subsidiaryCic: payload.subsidiaryCic, on: req.db),
+        guard let subsidiary = try await Subsidiary.findSubsidiary(subsidiaryCic: scopedToken.subsidiaryCic, on: req.db),
               let subsidiaryId = subsidiary.id else {
             throw Abort(.badRequest, reason: "subsidiary not found")
         }

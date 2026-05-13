@@ -1,6 +1,7 @@
 import Vapor
 import JWT
 import FlorShopDTOs
+import FlorShopAuthClient
 
 struct AuthController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -160,7 +161,7 @@ struct AuthController: RouteCollection {
         } else {//Creamos un nuevo usuario
             userNN = try await self.userManipulation.saveUser(provider: .google, userIdentityDTO: userIdentityDTO, on: req.db)
         }
-        let tokenString = try await TokenService.generateBaseToken(for: userNN, req: req)
+        let tokenString = try await TokenService.generateBaseToken(for: userNN, timeInterval: 86400, req: req)//1 dia de base token
         let randomData = Data((0..<32).map { _ in UInt8.random(in: 0...255) })
         let base64URL = randomData.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
@@ -183,6 +184,9 @@ struct AuthController: RouteCollection {
     //MARK: POST: auth/exchange
     @Sendable
     func exchangeAuthCodeForToken(req: Request) async throws -> BaseTokenResponse {
+        if let payload = try? await req.jwt.selfflorshop.verify() {
+            print("[AuthController] Payload: \(payload)")
+        }
         let codeExchangeReq = try req.content.decode(CodeExchangeRequest.self)
         let baseToken = try await AuthorizationCode.use(code: codeExchangeReq.code, on: req.db)
         return BaseTokenResponse(baseToken: baseToken)
@@ -202,7 +206,7 @@ struct AuthController: RouteCollection {
     //MARK: GET: auth/complete-info
     @Sendable
     func getAdditionalInfo(req: Request) async throws -> AuthAdditionalInfoResponse {//AuthAdditionalInfoRequest
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         guard let user = try await User.findUser(userCic: payload.sub.value, on: req.db) else {
             throw Abort(.badRequest, reason: "User not found")
         }

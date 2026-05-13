@@ -1,5 +1,7 @@
 import Vapor
 import FlorShopDTOs
+import FlorShopNetworking
+import FlorShopAuthClient
 
 struct CompanyController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -11,27 +13,49 @@ struct CompanyController: RouteCollection {
         company.post(use: updateCompany)
         let register = company.grouped("register")
         register.post(use: registerCompany)
+        let cic = company.grouped("cic")
+        cic.get(use: getUserCompany)
     }
     
     //MARK: GET: company
     @Sendable
     func getUserCompanies(_ req: Request) async throws -> [CompanyResponseDTO] {
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         let companies: [CompanyResponseDTO] = try await companyManipulation.getUserCompaniesWithInvitations(
             userCic: payload.sub.value,
             on: req.db
         )
         return companies
     }
+    //MARK: GET: /company/cic?companyCic=3293F1F2-F6D9-4386-8CC9-857448F5618E
+    @Sendable
+    func getUserCompany(_ req: Request) async throws -> CompanyResponseDTO {
+        guard let companyCic = try? req.query.get(String.self, at: "companyCic") else {
+            throw Abort(.badRequest, reason: "Must specify a companyCic id")
+        }
+        guard let baseTokenStr = req.headers.first(name: HTTPHeader.baseToken.rawValue) else {
+            throw Abort(.unauthorized, reason: "Missing user token")
+        }
+        let _ = try await req.jwt.selfflorshop.verify()
+        let baseToken: BaseTokenPayload = try await req.jwt.selfflorshop.verifyBaseToken(baseTokenStr)
+        guard let company = try await Company.getUserCompany(companyCic: companyCic, userCic: baseToken.sub.value, on: req.db) else {
+            throw Abort(.notFound, reason: "Company not found")
+        }
+        return company.toDTO(userCic: baseToken.sub.value)
+    }
     //MARK: POST: company
     @Sendable
     func updateCompany(_ req: Request) async throws -> DefaultResponse {
-        let payload = try await req.jwt.verify(as: InternalPayload.self)
+        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
+            throw Abort(.unauthorized, reason: "Missing user scopedToken")
+        }
+        let _ = try await req.jwt.selfflorshop.verify()
+        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let companyDTO = try req.content.decode(CompanyServerDTO.self)
         guard try await !Company.companyNameExist(name: companyDTO.companyName, on: req.db) else {
             throw Abort(.badRequest, reason: "Company name already exist")
         }
-        guard let company = try await Company.findCompany(companyCic: payload.companyCic, on: req.db) else {
+        guard let company = try await Company.findCompany(companyCic: scopedToken.companyCic, on: req.db) else {
             throw Abort(.badRequest, reason: "Company not found")
         }
         company.name = companyDTO.companyName

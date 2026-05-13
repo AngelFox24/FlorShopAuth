@@ -23,15 +23,16 @@ let package = Package(
         .package(url: "https://github.com/vapor-community/valkey.git", from: "1.2.0"),
         // 🔵 Extension para validar FlorShopAuth
         .package(url: "https://github.com/AngelFox24/florshop-auth-client.git", exact: "0.0.6"),
+//                .package(path: "../florshop-auth-client"),
         // 🔵 Extension para Networking
         .package(url: "https://github.com/AngelFox24/florshop-networking.git", exact: "0.0.6"),
         // 🔵 Extension para Valkey Streams
-        .package(url: "https://github.com/AngelFox24/florshop-valkey.git", exact: "0.0.2"),
-//                .package(path: "../florshop-valkey"),
+        .package(url: "https://github.com/AngelFox24/florshop-valkey.git", exact: "0.0.4"),
+        //.package(path: "../florshop-valkey"),
         // 🔵 Shared DTOs
-        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.28")
-        //        .package(path: "../florshop-dtos")
-//            .package(url: "https://github.com/AngelFox24/florshop-dtos.git", branch: "feature/add-valkey")
+        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", exact: "1.0.29")
+//        .package(path: "../florshop-dtos")
+//        .package(url: "https://github.com/AngelFox24/florshop-dtos.git", branch: "feature/fix-payment")
     ],
     targets: [
         .executableTarget(

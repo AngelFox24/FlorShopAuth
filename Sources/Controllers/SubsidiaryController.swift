@@ -1,5 +1,7 @@
 import Vapor
 import FlorShopDTOs
+import FlorShopAuthClient
+import FlorShopNetworking
 
 struct SubsidiaryController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -83,10 +85,14 @@ struct SubsidiaryController: RouteCollection {
     //POST: subsidiary
     @Sendable
     func saveSubsidiary(_ req: Request) async throws -> DefaultResponse {
-        let payload = try await req.jwt.verify(as: InternalPayload.self)
+        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
+            throw Abort(.unauthorized, reason: "Missing user token")
+        }
+        let _ = try await req.jwt.selfflorshop.verify()
+        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let registerDTO = try req.content.decode(RegisterSubsidiaryRequest.self)
         
-        let userCic = payload.sub.value
+        let userCic = scopedToken.sub.value
         try await req.db.transaction { transaction in
             if let subsidiaryCic = registerDTO.subsidiary.subsidiaryCic {//Enviar el subsidiaryCic tiene la intencion de actualizar
                 //Update
@@ -103,7 +109,7 @@ struct SubsidiaryController: RouteCollection {
                       let userId = user.id else {
                     throw Abort(.internalServerError, reason: "Failed to find user")
                 }
-                guard let company = try await Company.findCompany(companyCic: payload.companyCic, on: transaction),
+                guard let company = try await Company.findCompany(companyCic: scopedToken.companyCic, on: transaction),
                       let companyId = company.id else {
                     throw Abort(.internalServerError, reason: "Failed to find company")
                 }
@@ -128,12 +134,16 @@ struct SubsidiaryController: RouteCollection {
     //POST: usersubsidiary
     @Sendable
     func updateUserSubsidiary(_ req: Request) async throws -> DefaultResponse {
-        let payload = try await req.jwt.verify(as: InternalPayload.self)
+        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
+            throw Abort(.unauthorized, reason: "Missing user token")
+        }
+        let _ = try await req.jwt.selfflorshop.verify()
+        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let updateRequest = try req.content.decode(UpdateUserSubsidiaryRequest.self)
         //TODO: Validar si el payload.sub.value (employeeCic) tiene suficientes privilegios para cambiar privilegios a otros
         guard let userSubsidiary = try await UserSubsidiary.getSubsidiaryWhereUserWorks(
             userCic: updateRequest.employeeCic,
-            subsidiaryCic: payload.subsidiaryCic,
+            subsidiaryCic: scopedToken.subsidiaryCic,
             on: req.db
         ) else {
             throw Abort(.badRequest, reason: "UserSubsidiary don't exist")
