@@ -14,8 +14,12 @@ extension Application {
         guard let valkeyHost = Environment.get(EnvironmentVariables.valkeyHost.rawValue) else {
             fatalError("Missing \(EnvironmentVariables.valkeyHost.rawValue) in configuration")
         }
+        guard let valkeyPort = Environment.get(EnvironmentVariables.valkeyPort.rawValue),
+        let port: Int = Int(valkeyPort) else {
+            fatalError("Missing \(EnvironmentVariables.valkeyPort.rawValue) in configuration")
+        }
         self.valkey = ValkeyClient(
-            .hostname(valkeyHost, port: 6379),
+            .hostname(valkeyHost, port: port),
             configuration: configuration,
             eventLoopGroup: self.eventLoopGroup,
             logger: self.logger
