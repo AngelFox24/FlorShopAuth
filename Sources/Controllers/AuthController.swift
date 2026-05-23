@@ -1,7 +1,6 @@
 import Vapor
 import JWT
 import FlorShopDTOs
-import FlorShopAuthClient
 
 struct AuthController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -224,7 +223,7 @@ struct AuthController: RouteCollection {
     //MARK: POST: auth/complete-info
     @Sendable
     func postAdditionalInfo(req: Request) async throws -> DefaultResponse {
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         guard let dto = try? req.content.decode(AuthAdditionalInfoRequest.self) else {
             throw Abort(.badRequest, reason: "Invalid request")
         }

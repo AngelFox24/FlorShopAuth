@@ -1,6 +1,5 @@
 import Vapor
 import FlorShopDTOs
-import FlorShopAuthClient
 import FlorShopNetworking
 
 struct SubsidiaryController: RouteCollection {
@@ -27,7 +26,7 @@ struct SubsidiaryController: RouteCollection {
         guard let companyCic = try? req.query.get(String.self, at: "companyCic") else {
             throw Abort(.badRequest, reason: "Must specify a subsidiary id")
         }
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         let subsidiaries: [SubsidiaryResponseDTO] = try await companyManipulation.getUserSubsidiariesWithInvitations(
             userCic: payload.sub.value,
             companyCic: companyCic,
@@ -42,7 +41,7 @@ struct SubsidiaryController: RouteCollection {
             throw Abort(.badRequest, reason: "Must specify a subsidiary id")
         }
         // Obtener el usuario autenticado del JWT
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         let userCic = payload.sub.value
         //TODO: Select Company and Subsidiary
         let userSubsidiary: UserSubsidiary
@@ -89,7 +88,7 @@ struct SubsidiaryController: RouteCollection {
             throw Abort(.unauthorized, reason: "Missing user token")
         }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let registerDTO = try req.content.decode(RegisterSubsidiaryRequest.self)
         
         let userCic = scopedToken.sub.value
@@ -138,7 +137,7 @@ struct SubsidiaryController: RouteCollection {
             throw Abort(.unauthorized, reason: "Missing user token")
         }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let updateRequest = try req.content.decode(UpdateUserSubsidiaryRequest.self)
         //TODO: Validar si el payload.sub.value (employeeCic) tiene suficientes privilegios para cambiar privilegios a otros
         guard let userSubsidiary = try await UserSubsidiary.getSubsidiaryWhereUserWorks(

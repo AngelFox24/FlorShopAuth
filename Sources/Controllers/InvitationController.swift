@@ -1,6 +1,5 @@
 import Vapor
 import FlorShopDTOs
-import FlorShopAuthClient
 
 struct InvitationController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -12,7 +11,7 @@ struct InvitationController: RouteCollection {
     //Post: invitation
     @Sendable
     func registerInvitation(_ req: Request) async throws -> DefaultResponse {
-        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken()
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken()
         //TODO: Validate ScopedToken role
         guard let user = try await User.findUser(userCic: scopedToken.sub.value, on: req.db),
               let userId = user.id else {

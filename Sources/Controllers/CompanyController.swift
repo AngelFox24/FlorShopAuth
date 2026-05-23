@@ -1,7 +1,6 @@
 import Vapor
 import FlorShopDTOs
 import FlorShopNetworking
-import FlorShopAuthClient
 
 struct CompanyController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -37,7 +36,7 @@ struct CompanyController: RouteCollection {
             throw Abort(.unauthorized, reason: "Missing user token")
         }
         let _ = try await req.jwt.selfflorshop.verify()
-        let baseToken: BaseTokenPayload = try await req.jwt.selfflorshop.verifyBaseToken(baseTokenStr)
+        let baseToken = try await req.jwt.selfflorshop.verifyBaseToken(baseTokenStr)
         guard let company = try await Company.getUserCompany(companyCic: companyCic, userCic: baseToken.sub.value, on: req.db) else {
             throw Abort(.notFound, reason: "Company not found")
         }
@@ -50,7 +49,7 @@ struct CompanyController: RouteCollection {
             throw Abort(.unauthorized, reason: "Missing user scopedToken")
         }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken: ScopedTokenPayload = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
         let companyDTO = try req.content.decode(CompanyServerDTO.self)
         guard try await !Company.companyNameExist(name: companyDTO.companyName, on: req.db) else {
             throw Abort(.badRequest, reason: "Company name already exist")
@@ -65,7 +64,7 @@ struct CompanyController: RouteCollection {
     //MARK: POST: company/register
     @Sendable
     func registerCompany(_ req: Request) async throws -> ScopedTokenWithRefreshResponse {
-        let payload = try await req.jwt.verify(as: BaseTokenPayload.self)
+        let payload = try await req.jwt.selfflorshop.verifyBaseToken()
         let registerDTO = try req.content.decode(RegisterCompanyRequest.self)
         //TODO: Validate Payment
         let userSubsidiary = try await req.db.transaction { transaction -> UserSubsidiary in

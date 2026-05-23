@@ -8,7 +8,7 @@ enum FlorShopBillingApiRequest {
 
 extension FlorShopBillingApiRequest: NetworkRequest {
     var url: URL? {
-        let baseUrl = AppConfig.florShopBillingBaseURL
+        let baseUrl = AppConfig.florShopBillingApiURL
         let path: String
         switch self {
         case .getPlanByCic(let planCic, _):

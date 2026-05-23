@@ -19,7 +19,7 @@ enum EnvironmentVariables: String {
     case florShopJwtAudience = "FLORSHOP_CORE_JWT_AUDIENCE"
     case florShopJwtIssuer = "FLORSHOP_JWT_ISSUER"
     case florShopWebBaseURL = "FLORSHOP_WEB_BASE_URL"
-    case florShopBillingBaseURL = "FLORSHOP_BILLING_BASE_URL"
+    case florShopBillingApiURL = "FLORSHOP_BILLING_API_URL"
     case valkeyHost = "VALKEY_HOST"
     case valkeyPort = "VALKEY_PORT"
 }
