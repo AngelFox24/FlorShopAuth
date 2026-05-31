@@ -1,5 +1,5 @@
 {
-  "originHash" : "e832263fd6671f41d01bad29fd65b32b6ade85699aa7fee3d093f545c9b97a4e",
+  "originHash" : "2d91c8d488652d59e00e9690af4380a7ec5b1388245d7b32f1a05d7e7dcc03fc",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AngelFox24/florshop-dtos.git",
       "state" : {
-        "revision" : "65374cc289fbaeb5b85d8457c47817a410b335f9",
-        "version" : "1.0.29"
+        "revision" : "25bf57051659fc149033412a1c2ea6af647fd29a",
+        "version" : "1.0.30"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AngelFox24/florshop-valkey.git",
       "state" : {
-        "revision" : "4dba75a33fbb29155ae0c4f096fcde5af63b7ca0",
-        "version" : "0.0.4"
+        "revision" : "c72d94e2a8d969dc4ad577a864c6bb7a5ca951cc",
+        "version" : "0.0.6"
       }
     },
     {

@@ -44,6 +44,15 @@ extension Company {
             suscription: self.subscription?.toClientDTO()
         )
     }
+    func toClientDTO() -> CompanyClientDTO {
+        CompanyClientDTO(
+            companyCic: self.companyCic,
+            companyName: self.name,
+            ruc: "",
+            createdAt: self.createdAt ?? Date(),
+            updatedAt: self.updatedAt ?? Date()
+        )
+    }
 }
 
 extension Company {

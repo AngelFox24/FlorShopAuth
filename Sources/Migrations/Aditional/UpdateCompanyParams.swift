@@ -8,7 +8,7 @@ struct UpdateCompanyParams: AsyncMigration {
     }
 
     func revert(on database: any Database) async throws {
-        try await database.schema(User.schema)
+        try await database.schema(Company.schema)
             .deleteField("subscription_id")
             .update()
     }

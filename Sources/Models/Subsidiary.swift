@@ -32,6 +32,19 @@ final class Subsidiary: Model, @unchecked Sendable {
 }
 
 extension Subsidiary {
+    func toClientDTO() -> SubsidiaryClientDTO {
+        SubsidiaryClientDTO(
+            subsidiaryCic: self.subsidiaryCic,
+            name: self.name,
+            companyCic: self.company.companyCic,
+            imageUrl: nil,
+            createdAt: self.createdAt ?? Date(),
+            updatedAt: self.updatedAt ?? Date()
+        )
+    }
+}
+
+extension Subsidiary {
     func getCompanyOwner(on db: any Database) async throws -> User {
         let company = try await self.$company.get(on: db)
         return try await company.$user.get(on: db)

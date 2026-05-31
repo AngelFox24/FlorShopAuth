@@ -1,6 +1,8 @@
 import Vapor
+import Fluent
 import FlorShopDTOs
 import FlorShopNetworking
+import Valkey
 
 struct CompanyController: RouteCollection {
     let authProviderManager: AuthProviderManager
@@ -99,8 +101,40 @@ struct CompanyController: RouteCollection {
             )
             return userSubsidiary
         }
+        let subsidiary = try await userSubsidiary.$subsidiary.get(on: req.db)
+        try await self.sendNewCompany(subsidiaryId: subsidiary.requireID(), req: req, on: req.db)
         let tokenString = try await TokenService.generateScopedToken(userSubsidiary: userSubsidiary, req: req)
         let refreshScopedToken = try await TokenService.getRefreshScopedToken(userSubsidiary: userSubsidiary, req: req)
         return ScopedTokenWithRefreshResponse(scopedToken: tokenString, refreshScopedToken: refreshScopedToken)
+    }
+    
+    private func sendNewCompany(subsidiaryId: UUID?, req: Request, on db: any Database) async throws {
+        guard let subsidiary = try await Subsidiary.find(subsidiaryId, on: db) else {
+            req.logger.warning("[sendNewCompany] No se pudo encontrar la subsidiary: \(String(describing: subsidiaryId))")
+            return
+        }
+        try await subsidiary.$company.load(on: db)
+        let event: InitialDataDTO = InitialDataDTO(
+            company: subsidiary.company.toClientDTO(),
+            subsidiary: subsidiary.toClientDTO()
+        )
+        let jsonData = try req.myJSONEncoder.encode(event)
+        //InitialDataDTO
+        guard let payloadJSON = String(data: jsonData, encoding: .utf8) else {
+            throw Abort(.internalServerError, reason: "Can't convert to JSON")
+        }
+        // 2. Preparar los datos para XADD
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let data: [XADD<String, String>.Data] = [
+            .init(field: "type", value: ValkeyEventType.Auth.newCompany.rawValue),
+            .init(field: "payload", value: payloadJSON),
+            .init(field: "timestamp", value: timestamp)
+        ]
+        let messageId = try await req.valkey.xadd(
+            ValkeyKey(ValkeyStream.auth.rawValue),
+            idSelector: .autoId,
+            data: data
+        )
+        req.logger.info("Evento enviado al stream \(ValkeyStream.auth.rawValue) con ID \(String(describing: messageId))")
     }
 }
