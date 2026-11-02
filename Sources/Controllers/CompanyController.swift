@@ -47,11 +47,8 @@ struct CompanyController: RouteCollection {
     //MARK: POST: company
     @Sendable
     func updateCompany(_ req: Request) async throws -> DefaultResponse {
-        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
-            throw Abort(.unauthorized, reason: "Missing user scopedToken")
-        }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken()
         let companyDTO = try req.content.decode(CompanyServerDTO.self)
         guard try await !Company.companyNameExist(name: companyDTO.companyName, on: req.db) else {
             throw Abort(.badRequest, reason: "Company name already exist")

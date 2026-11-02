@@ -84,11 +84,8 @@ struct SubsidiaryController: RouteCollection {
     //POST: subsidiary
     @Sendable
     func saveSubsidiary(_ req: Request) async throws -> DefaultResponse {
-        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
-            throw Abort(.unauthorized, reason: "Missing user token")
-        }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken()
         let registerDTO = try req.content.decode(RegisterSubsidiaryRequest.self)
         
         let userCic = scopedToken.sub.value
@@ -133,11 +130,8 @@ struct SubsidiaryController: RouteCollection {
     //POST: usersubsidiary
     @Sendable
     func updateUserSubsidiary(_ req: Request) async throws -> DefaultResponse {
-        guard let scopedTokenStr = req.headers.first(name: HTTPHeader.scopedToken.rawValue) else {
-            throw Abort(.unauthorized, reason: "Missing user token")
-        }
         let _ = try await req.jwt.selfflorshop.verify()
-        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken(scopedTokenStr)
+        let scopedToken = try await req.jwt.selfflorshop.verifyScopedToken()
         let updateRequest = try req.content.decode(UpdateUserSubsidiaryRequest.self)
         //TODO: Validar si el payload.sub.value (employeeCic) tiene suficientes privilegios para cambiar privilegios a otros
         guard let userSubsidiary = try await UserSubsidiary.getSubsidiaryWhereUserWorks(

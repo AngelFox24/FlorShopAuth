@@ -15,7 +15,6 @@ extension Request.JWT {
             guard let token = _jwt._request.headers.bearerAuthorization?.token else {
                 throw Abort(.unauthorized)
             }
-
             return try await verify(token)
         }
 
@@ -24,15 +23,13 @@ extension Request.JWT {
                 token,
                 as: FlorShopAuthClient.InternalServiceTokenPayload.self
             )
-
             return payload
         }
 
         public func verifyBaseToken() async throws -> FlorShopAuthClient.BaseTokenPayload {
-            guard let token = _jwt._request.headers.bearerAuthorization?.token else {
-                throw Abort(.unauthorized)
+            guard let token = _jwt._request.headers.first(name: "X-User-BaseToken") else {
+                throw Abort(.unauthorized, reason: "Missing Base Token")
             }
-            
             return try await verifyBaseToken(token)
         }
 
@@ -41,15 +38,13 @@ extension Request.JWT {
                 token,
                 as: FlorShopAuthClient.BaseTokenPayload.self
             )
-
             return payload
         }
 
         public func verifyScopedToken() async throws -> FlorShopAuthClient.ScopedTokenPayload {
-            guard let token = _jwt._request.headers.bearerAuthorization?.token else {
-                throw Abort(.unauthorized)
+            guard let token = _jwt._request.headers.first(name: "X-User-ScopedToken") else {
+                throw Abort(.unauthorized, reason: "Missing Base Token")
             }
-            
             return try await verifyScopedToken(token)
         }
 
@@ -58,7 +53,6 @@ extension Request.JWT {
                 token,
                 as: FlorShopAuthClient.ScopedTokenPayload.self
             )
-
             return payload
         }
     }
